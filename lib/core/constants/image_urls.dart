@@ -1,0 +1,23 @@
+/// Stitch TransitConnect design assets — project 15282301083923440944
+abstract final class ImageUrls {
+  static const String mapNightLagos =
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCcPAWsLrRDuyHui4HWmvC8zYwYQ1-JVZzryOIZ4mbyl4CyOIWb9fdLSoUbKerjCXMbwN690FxNKWSX8907S8GlG-9-4SrXYKEC8eutmVXK0q5poJoB6fEJECL4hknA_O7D17IvluBCUOZK6MqfXpGaPdlX1iZXeQ_GGa8KNyZ2QLSlZo6hR_0LSGhJ9U5MvFBhdfrO2rTO6G_L8aYeClKaIut_hjUu2Rjl7cIUHJY8wi4OOisqe40yJYNFDF8Xvn5nHUU3gbI-Dbhj';
+
+  static const String dashboardMap =
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDE16pd5vTZAuh86qsl-X9p4faL-uoMChVit1XQK3YmTabZHEzyVa2ciCP48_uCp3Qi-62ue6NxwZfgukBW0othrdzZ87Jc3CWO6yyBpKyslJgFLaJbZ_StHZzROeKvzGu2Pn7aB6UpkjhWaUfspuKdb8h7A2Gv_sOIxZNZ3S2cj7pKjCJUvuJn-x5AflP6o8A7xt37r3EEv5KI7DdR6BnQUlPEYd7pPk-n1UBkYgoWcY9_eYvdlRjgVYY2ndmZI66NGc3sbLMUnLUX';
+
+  static const String headerAvatar =
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuB9vW-inSvECv0jy5RnonoBOMKs17NFQdRDNR8vL8BxTfwriRNbtajC2PawOqB5xh3xhbpCNjoW_DwvUqHtQwhUS1lJcNn_oPfmFydkwcLYCSHHTPBBUMwVBEclDOUMqcIa58H38tu730s3MyCnDeTfMaHBHSQzp87AURFGu77hWU0M3Ll6YW30Zsl8eZH8Dgk4GGMfVV_H9V1E_YmUVreY5-LTPRUuIL8fTosvyyS4mnA_YCjo673_zfMp-yxaliCinR502BC8f13M';
+
+  static const String dashboardAvatar =
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAV7K924DDIh6xqNLYEiUUdJUtZO6MMvEHBQ07eMFGloecOnyrM9hsYJzdUdGygWjv1eKWf1-EI8bWgaSqoX_OUWs6KJ7OadakYHudgDi-JMJWeCYd9p607C4_zeYQAjIk-GSqIORPTqHZnW7vWhoEmAfdWaInymDrYBMO_-Cqfl92yicxpAb5RevvaHBHnUl6m7-mgSGqwuSYGOkVJZhLLte0FxG-LOCjKeuMaaPjF8_xkgqlgqsge8V06DBTlSF2rQV7eDoP12YAh';
+
+  static const String driverAvatar =
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAryll2NWngjTuSUfqKWJz6iGFLamo-ApEyQE9pBk3-b2A1d7ZvUinVAD4hVDF3_708BG5k8SiI7-uIZlhy_MnilJNFDH7SpufE0y1GgVENyj4MI5kK0tPrPXBDXNT3DH0uZpPfU0eDOfpk9lypkcSA1B7qb1KVA27FfnlSlQN8bBPMKp75qJQzv346Pu_PEZ2v4dn5skgjwj7pvpXzno5aG1adNgKm1KbZBeBv2Gan2fADukLAvh-6zO0TXQfhmemAVVyvc6ZdyELS';
+
+  static const String profileAvatar =
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCsypr1RwWHmNI5L4zzk3kNfhPo9ypbv8E4suHjkuM90EK8OJXNrPq8X_gG-GyNeMej-KSVob41dA0V8_Kia5GuBHZmDHJ5_5gSN0fqXKpSEar3zWv9SqXjEVEU06d-RDPQyBgvUFUhx9d1OV3f2IFqHQswq5lWrqN-TMSPjITBU02XEg30Amab3xb2PDzNwinJG66YtWEEmt7TE8loZbxaJqVtbOwWft-k1xJmMuHO2YYoEkVyn5PGWf1DtsihIkP9hBX6-KgO_f-l';
+
+  static const String sideNavAvatar =
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuC48Yo_Kzahjd54qZdpUcizk-Hao9moo07-Ja3xPpbWRp7AKepVR24Ui0QZ2GrWVXU4n-etf4nN33QTMxawX-EJZeZqBSyzwxIovR1jDHyYzrU-bremPk6nU0_8A-4cljTxj7bpWSIpDuTGN_gTgnzexgCYvERYKmqQFGEo9XkaH_7LvIZXY7UhV1Aq3MNc4YjMLeVJN7sjLE_gOh_8g2EeJ_nF-QD4ymM043U_qun8Q9BNyPvxzpoJC2Ws-9cufTFIO_5Qi1DdQK1N';
+}
