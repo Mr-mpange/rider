@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../core/router/app_router.dart';
 import '../core/services/app_preferences.dart';
+import '../core/services/auth_service.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_typography.dart';
 
@@ -32,7 +33,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     await Future<void>.delayed(const Duration(seconds: 2));
     if (!mounted) return;
 
-    context.go(prefs.onboardingComplete ? AppRoutes.home : AppRoutes.onboarding);
+    final auth = context.read<AuthService>();
+    if (!prefs.onboardingComplete) {
+      context.go(AppRoutes.onboarding);
+      return;
+    }
+    context.go(auth.isAuthenticated ? AppRoutes.home : AppRoutes.login);
   }
 
   @override

@@ -7,6 +7,7 @@ import '../core/router/app_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../widgets/live_tracking_card.dart';
 
 class ActiveTripScreen extends StatelessWidget {
   const ActiveTripScreen({super.key});
@@ -50,9 +51,15 @@ class ActiveTripScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Driver arriving in 4 min', style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
+                        Text('Live trip tracking', style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
                         const SizedBox(height: 6),
-                        Text('Chidi A. • Lexus ES 350', style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
+                        const LiveTrackingCard(
+                          title: 'Driver arriving in 4 min',
+                          subtitle: 'Asha M. • Toyota Premio',
+                          distance: '1.4 km',
+                          eta: '4 min',
+                          status: 'ON ROUTE',
+                        ),
                         const SizedBox(height: 14),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(999),

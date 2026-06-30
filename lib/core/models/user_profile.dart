@@ -2,6 +2,7 @@ class UserProfile {
   const UserProfile({
     required this.uid,
     required this.displayName,
+    required this.email,
     required this.phoneNumber,
     this.photoUrl,
     this.tripCount = 0,
@@ -12,6 +13,7 @@ class UserProfile {
 
   final String uid;
   final String displayName;
+  final String email;
   final String phoneNumber;
   final String? photoUrl;
   final int tripCount;
@@ -23,6 +25,7 @@ class UserProfile {
     return UserProfile(
       uid: uid,
       displayName: data['displayName'] as String? ?? '',
+      email: data['email'] as String? ?? '',
       phoneNumber: data['phoneNumber'] as String? ?? '',
       photoUrl: data['photoUrl'] as String?,
       tripCount: (data['tripCount'] as num?)?.toInt() ?? 0,
@@ -34,6 +37,7 @@ class UserProfile {
 
   Map<String, dynamic> toFirestore() => {
         'displayName': displayName,
+        'email': email,
         'phoneNumber': phoneNumber,
         if (photoUrl != null) 'photoUrl': photoUrl,
         'tripCount': tripCount,

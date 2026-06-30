@@ -1,9 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../core/constants/image_urls.dart';
 import '../core/models/bus_stop.dart';
 import '../core/router/app_router.dart';
 import '../core/services/firestore_service.dart';
@@ -22,11 +21,54 @@ class HomeMapScreen extends StatefulWidget {
 }
 
 class _HomeMapScreenState extends State<HomeMapScreen> {
+  GoogleMapController? _mapController;
   final _searchController = TextEditingController();
-  final double _sheetExtent = 0.5;
+
+  static const _center = CameraPosition(
+    target: LatLng(-6.7924, 39.2083),
+    zoom: 12.5,
+  );
+
+  final Set<Marker> _markers = {
+    Marker(
+      markerId: MarkerId('current'),
+      position: LatLng(-6.7924, 39.2083),
+      infoWindow: InfoWindow(title: 'You are here'),
+    ),
+    Marker(
+      markerId: MarkerId('ubungo'),
+      position: LatLng(-6.7911, 39.2077),
+      infoWindow: InfoWindow(title: 'Ubungo'),
+    ),
+    Marker(
+      markerId: MarkerId('mwenge'),
+      position: LatLng(-6.7702, 39.2429),
+      infoWindow: InfoWindow(title: 'Mwenge'),
+    ),
+    Marker(
+      markerId: MarkerId('posta'),
+      position: LatLng(-6.8167, 39.2877),
+      infoWindow: InfoWindow(title: 'Posta Mpya'),
+    ),
+  };
+
+  final Set<Polyline> _routes = {
+    Polyline(
+      polylineId: PolylineId('main-route'),
+      points: [
+        LatLng(-6.7911, 39.2077),
+        LatLng(-6.7850, 39.2210),
+        LatLng(-6.7785, 39.2350),
+        LatLng(-6.7702, 39.2429),
+      ],
+      color: AppColors.primary,
+      width: 6,
+    ),
+  };
 
   @override
   void dispose() {
+    _mapController?.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -37,14 +79,15 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
         break;
       case AppNavTab.saved:
         context.go(AppRoutes.savedPlaces);
-        break;
       case AppNavTab.reports:
         context.go(AppRoutes.reports);
-        break;
       case AppNavTab.profile:
         context.go(AppRoutes.profile);
-        break;
     }
+  }
+
+  Future<void> _centerMap() async {
+    await _mapController?.animateCamera(CameraUpdate.newCameraPosition(_center));
   }
 
   @override
@@ -52,15 +95,29 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: CachedNetworkImage(
-              imageUrl: ImageUrls.mapNightLagos,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(color: AppColors.surfaceVariant),
-              errorWidget: (context, url, error) => Container(color: AppColors.surfaceVariant),
+          GoogleMap(
+            initialCameraPosition: _center,
+            onMapCreated: (controller) => _mapController = controller,
+            markers: _markers,
+            polylines: _routes,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+            mapToolbarEnabled: false,
+            compassEnabled: false,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.26),
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.12),
+                ],
+              ),
             ),
           ),
-          const _MapMarkers(),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -71,100 +128,50 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
               ),
               child: Column(
                 children: [
-                  Container(
-                    height: 56,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: AppColors.outlineVariant.withValues(alpha: 0.2),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => _showDrawer(context),
+                        icon: const Icon(Icons.menu, color: Colors.white),
                       ),
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: () => _showDrawer(context),
-                          icon: const Icon(Icons.menu, color: AppColors.primary),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'RIDER',
+                          style: AppTypography.textTheme.headlineSmall?.copyWith(color: Colors.white),
+                          textAlign: TextAlign.center,
                         ),
-                        Expanded(
-                          child: Text(
-                            'RIDER',
-                            textAlign: TextAlign.center,
-                            style: AppTypography.textTheme.headlineSmall?.copyWith(
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => context.go(AppRoutes.profile),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.primaryContainer, width: 2),
-                            ),
-                            child: ClipOval(
-                              child: CachedNetworkImage(
-                                imageUrl: ImageUrls.headerAvatar,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      IconButton(
+                        onPressed: _centerMap,
+                        icon: const Icon(Icons.my_location, color: Colors.white),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
                   Material(
                     elevation: 8,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                     child: InkWell(
                       onTap: () => context.push(AppRoutes.destinationSearch),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: AppColors.outlineVariant.withValues(alpha: 0.3),
-                          ),
+                          color: AppColors.surface.withValues(alpha: 0.96),
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           children: [
+                            const Icon(Icons.search, color: AppColors.primary),
+                            const SizedBox(width: 12),
                             Expanded(
-                              child: Container(
-                                height: 48,
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                decoration: BoxDecoration(
-                                  color: AppColors.surfaceContainerLow,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.search, color: AppColors.primary),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        'Unaenda wapi?',
-                                        style: AppTypography.textTheme.bodyLarge?.copyWith(
-                                          color: AppColors.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 1,
-                                      height: 24,
-                                      color: AppColors.outlineVariant,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    const Icon(Icons.mic, color: AppColors.onSurfaceVariant),
-                                  ],
-                                ),
+                              child: Text(
+                                'Unaenda wapi?',
+                                style: AppTypography.textTheme.bodyLarge?.copyWith(color: AppColors.onSurfaceVariant),
                               ),
                             ),
+                            const Icon(Icons.mic, color: AppColors.onSurfaceVariant),
                           ],
                         ),
                       ),
@@ -182,9 +189,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                 _FabButton(
                   icon: Icons.my_location,
                   small: true,
-                  onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Location centering is not yet connected.')),
-                  ),
+                  onTap: _centerMap,
                 ),
                 const SizedBox(height: 12),
                 _FabButton(
@@ -196,7 +201,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
             ),
           ),
           DraggableScrollableSheet(
-            initialChildSize: _sheetExtent,
+            initialChildSize: 0.5,
             minChildSize: 0.2,
             maxChildSize: 0.85,
             builder: (context, scrollController) {
@@ -214,37 +219,24 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                 ),
                 child: Column(
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).maybePop(),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Center(
-                          child: Container(
-                            width: 40,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: AppColors.outlineVariant,
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                          ),
-                        ),
+                    const SizedBox(height: 10),
+                    Container(
+                      width: 40,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: AppColors.outlineVariant,
+                        borderRadius: BorderRadius.circular(999),
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile),
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile, vertical: 14),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Stendi za karibu', style: AppTypography.textTheme.headlineSmall),
                           TextButton(
                             onPressed: () => context.push(AppRoutes.savedPlaces),
-                            child: Text(
-                              'Tazama zote',
-                              style: AppTypography.textTheme.labelLarge?.copyWith(
-                                color: AppColors.primary,
-                              ),
-                            ),
+                            child: const Text('Tazama zote'),
                           ),
                         ],
                       ),
@@ -259,31 +251,9 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                               child: ShimmerLoading(),
                             );
                           }
-                          final stops = snapshot.data ?? [];
+                          final stops = snapshot.data ?? const <BusStop>[];
                           if (stops.isEmpty) {
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.location_off, size: 48, color: AppColors.outline),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      'Hakuna stendi za karibu',
-                                      style: AppTypography.textTheme.bodyLarge,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Jaribu kutafuta kituo kingine',
-                                      style: AppTypography.textTheme.bodyMedium?.copyWith(
-                                        color: AppColors.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
+                            return const Center(child: Text('Hakuna stendi za karibu'));
                           }
                           return ListView.separated(
                             controller: scrollController,
@@ -299,7 +269,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                               final stop = stops[index];
                               return StandCard(
                                 stop: stop,
-                                opacity: index == stops.length - 1 ? 0.8 : 1.0,
+                                opacity: 1,
                                 onTap: () => context.push(
                                   AppRoutes.routeRecommendation,
                                   extra: {
@@ -318,16 +288,11 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
               );
             },
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: AppBottomNavBar(
-              currentTab: AppNavTab.home,
-              onTabSelected: _onNavTab,
-            ),
-          ),
         ],
+      ),
+      bottomNavigationBar: AppBottomNavBar(
+        currentTab: AppNavTab.home,
+        onTabSelected: _onNavTab,
       ),
     );
   }
@@ -339,168 +304,25 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Material(
-              color: Colors.transparent,
-              child: ListTile(
-                leading: const Icon(Icons.admin_panel_settings),
-                title: const Text('Admin Dashboard'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  context.push(AppRoutes.admin);
-                },
-              ),
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings),
+              title: const Text('Admin Dashboard'),
+              onTap: () {
+                Navigator.pop(ctx);
+                context.push(AppRoutes.admin);
+              },
             ),
-            Material(
-              color: Colors.transparent,
-              child: ListTile(
-                leading: const Icon(Icons.bookmark),
-                title: const Text('Sehemu Zilizohifadhiwa'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  context.go(AppRoutes.savedPlaces);
-                },
-              ),
+            ListTile(
+              leading: const Icon(Icons.bookmark),
+              title: const Text('Sehemu Zilizohifadhiwa'),
+              onTap: () {
+                Navigator.pop(ctx);
+                context.go(AppRoutes.savedPlaces);
+              },
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _MapMarkers extends StatelessWidget {
-  const _MapMarkers();
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Stack(
-          children: [
-            Positioned(
-              left: constraints.maxWidth * 0.48,
-              top: constraints.maxHeight * 0.45,
-              child: _UserLocationMarker(),
-            ),
-            Positioned(
-              left: constraints.maxWidth * 0.55,
-              top: constraints.maxHeight * 0.40,
-              child: const _StopMarker(label: 'Mwenge'),
-            ),
-            Positioned(
-              left: constraints.maxWidth * 0.30,
-              top: constraints.maxHeight * 0.55,
-              child: const _StopMarker(label: 'Ubungo'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _UserLocationMarker extends StatefulWidget {
-  @override
-  State<_UserLocationMarker> createState() => _UserLocationMarkerState();
-}
-
-class _UserLocationMarkerState extends State<_UserLocationMarker>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2))
-      ..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Container(
-                width: 48 * _controller.value,
-                height: 48 * _controller.value,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary.withValues(alpha: 0.4 * (1 - _controller.value)),
-                ),
-              );
-            },
-          ),
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 8),
-              ],
-            ),
-            child: Center(
-              child: Container(
-                width: 16,
-                height: 16,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StopMarker extends StatelessWidget {
-  const _StopMarker({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.primaryContainer,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8),
-            ],
-          ),
-          child: const Icon(Icons.directions_bus, color: AppColors.onPrimaryContainer, size: 20),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.outlineVariant),
-          ),
-          child: Text(label, style: AppTypography.textTheme.labelSmall),
-        ),
-      ],
     );
   }
 }
@@ -520,21 +342,17 @@ class _FabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = small ? 48.0 : 56.0;
     return Material(
+      color: primary ? AppColors.primary : AppColors.surface.withValues(alpha: 0.95),
+      shape: const CircleBorder(),
       elevation: 8,
-      borderRadius: BorderRadius.circular(primary ? 16 : 12),
-      color: primary ? AppColors.secondaryContainer : AppColors.surface,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(primary ? 16 : 12),
+        customBorder: const CircleBorder(),
         child: SizedBox(
-          width: size,
-          height: size,
-          child: Icon(
-            icon,
-            color: primary ? AppColors.onSecondaryContainer : AppColors.primary,
-          ),
+          width: small ? 44 : 52,
+          height: small ? 44 : 52,
+          child: Icon(icon, color: primary ? Colors.white : AppColors.primary),
         ),
       ),
     );

@@ -6,14 +6,12 @@ import '../models/user_profile.dart';
 
 class AuthService extends ChangeNotifier {
   UserProfile? _profile;
-
-  String? _verificationId;
-  String? _pendingPhone;
+  String? _registeredPassword;
 
   bool get isFirebaseReady => false;
 
-  dynamic get currentUser => null;
-  bool get isAuthenticated => false;
+  dynamic get currentUser => _profile;
+  bool get isAuthenticated => _profile != null;
   Stream<dynamic> get authStateChanges => const Stream<dynamic>.empty();
 
   Future<UserProfile?> getUserProfile() async => _profile;
@@ -22,52 +20,44 @@ class AuthService extends ChangeNotifier {
     return Stream<UserProfile?>.value(_profile);
   }
 
-  Future<void> sendPhoneOtp(String phoneDigits) async {
-    _pendingPhone = '+255$phoneDigits';
-    _verificationId = 'offline-verification';
-    notifyListeners();
-  }
-
-  Future<void> verifyOtp(String code) async {
-    if (_verificationId == null) {
-      throw Exception('No verification in progress');
-    }
-    _profile = UserProfile(
-      uid: 'offline-user',
-      displayName: 'Msafiri',
-      phoneNumber: _pendingPhone ?? '',
-      photoUrl: null,
-      isVerified: true,
-      tripCount: 0,
-      balanceTzs: 0,
-    );
-    _verificationId = null;
-    notifyListeners();
-  }
-
   Future<void> registerUser({
     required String displayName,
-    required String phoneDigits,
+    required String email,
+    required String password,
   }) async {
-    _pendingPhone = '+255$phoneDigits';
+    _registeredPassword = password;
     _profile = UserProfile(
       uid: 'offline-user',
       displayName: displayName,
-      phoneNumber: _pendingPhone ?? '',
+      email: email,
+      phoneNumber: '',
       photoUrl: null,
       isVerified: true,
       tripCount: 0,
       balanceTzs: 0,
     );
-    _verificationId = 'offline-verification';
+    notifyListeners();
+  }
+
+  Future<void> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    if (_profile == null) {
+      throw Exception('No account registered');
+    }
+    if (_profile!.email != email || _registeredPassword != password) {
+      throw Exception('Invalid email or password');
+    }
     notifyListeners();
   }
 
   Future<void> signInWithGoogle() async {
-    _profile = UserProfile(
+    _profile ??= UserProfile(
       uid: 'offline-user',
-      displayName: 'Msafiri',
-      phoneNumber: _pendingPhone ?? '',
+      displayName: 'Asha',
+      email: 'user@example.com',
+      phoneNumber: '',
       photoUrl: null,
       isVerified: true,
       tripCount: 0,
@@ -81,6 +71,7 @@ class AuthService extends ChangeNotifier {
     _profile = UserProfile(
       uid: _profile!.uid,
       displayName: displayName ?? _profile!.displayName,
+      email: _profile!.email,
       phoneNumber: _profile!.phoneNumber,
       photoUrl: photoUrl ?? _profile!.photoUrl,
       isVerified: _profile!.isVerified,
@@ -92,10 +83,7 @@ class AuthService extends ChangeNotifier {
 
   Future<void> signOut() async {
     _profile = null;
-    _verificationId = null;
-    _pendingPhone = null;
+    _registeredPassword = null;
     notifyListeners();
   }
-
-  String? get pendingPhone => _pendingPhone;
 }

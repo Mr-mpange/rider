@@ -19,7 +19,7 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 80,
+      height: 76,
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(
@@ -101,7 +101,7 @@ class _NavItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: active && filled
-            ? const EdgeInsets.symmetric(horizontal: 20, vertical: 4)
+            ? const EdgeInsets.symmetric(horizontal: 18, vertical: 2)
             : EdgeInsets.zero,
         decoration: active && filled
             ? BoxDecoration(
@@ -118,18 +118,24 @@ class _NavItem extends StatelessWidget {
               color: active && filled
                   ? AppColors.onSecondaryContainer
                   : AppColors.onSurfaceVariant,
-              size: 24,
+              size: 22,
             ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: AppTypography.textTheme.labelSmall?.copyWith(
-                color: active && filled
-                    ? AppColors.onSecondaryContainer
-                    : AppColors.onSurfaceVariant,
+            const SizedBox(height: 1),
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.textTheme.labelSmall?.copyWith(
+                    height: 1.0,
+                    color: active && filled
+                        ? AppColors.onSecondaryContainer
+                        : AppColors.onSurfaceVariant,
+                  ),
+                ),
               ),
             ),
           ],

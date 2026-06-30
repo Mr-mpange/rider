@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../core/router/app_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../widgets/live_tracking_card.dart';
 import '../widgets/rider_bottom_nav_bar.dart';
 
 class CargoScreen extends StatelessWidget {
@@ -27,43 +30,59 @@ class CargoScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainerLowest,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.35)),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.04),
-                    blurRadius: 18,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+            InkWell(
+              onTap: () => context.push(AppRoutes.freight),
+              borderRadius: BorderRadius.circular(24),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.35)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.04),
+                      blurRadius: 18,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: AppColors.tertiaryContainer.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Icon(Icons.local_shipping_outlined, color: AppColors.tertiary),
+                    ),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Freight Marketplace', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                          SizedBox(height: 4),
+                          Text('Bulk logistics and interstate cargo', style: TextStyle(fontSize: 12, color: AppColors.outline)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: AppColors.tertiaryContainer.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: const Icon(Icons.local_shipping_outlined, color: AppColors.tertiary),
-                  ),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Freight Marketplace', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                        SizedBox(height: 4),
-                        Text('Bulk logistics and interstate cargo', style: TextStyle(fontSize: 12, color: AppColors.outline)),
-                      ],
-                    ),
-                  ),
-                ],
+            ),
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () => context.push(AppRoutes.coldChain),
+              borderRadius: BorderRadius.circular(24),
+              child: const LiveTrackingCard(
+                title: 'Cold cargo live tracking',
+                subtitle: 'Truck AZ-440 is moving through the port corridor',
+                distance: '84 km',
+                eta: '3h 24m',
+                status: 'SECURE',
               ),
             ),
             const SizedBox(height: 12),

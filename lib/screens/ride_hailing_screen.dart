@@ -7,6 +7,7 @@ import '../core/router/app_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../widgets/live_tracking_card.dart';
 import '../widgets/rider_bottom_nav_bar.dart';
 
 class RideHailingScreen extends StatelessWidget {
@@ -64,13 +65,13 @@ class RideHailingScreen extends StatelessWidget {
                             children: [
                               Text('From', style: TextStyle(fontSize: 12, color: AppColors.outline)),
                               SizedBox(height: 2),
-                              Text('Victoria Island', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                              Text('Kariakoo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                               SizedBox(height: 10),
                               Divider(height: 1),
                               SizedBox(height: 10),
                               Text('To', style: TextStyle(fontSize: 12, color: AppColors.outline)),
                               SizedBox(height: 2),
-                              Text('Lekki Phase 1', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                              Text('Ubungo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ),
@@ -110,7 +111,7 @@ class RideHailingScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Lekki Direct', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                                Text('Dar Direct', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                                 SizedBox(height: 2),
                                 Text('4 min away', style: TextStyle(fontSize: 12, color: AppColors.secondary)),
                               ],
@@ -119,7 +120,7 @@ class RideHailingScreen extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text('₦ 4,200', style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
+                              Text('TSh 4,200', style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
                               Text('Estimated Total', style: AppTypography.caption),
                             ],
                           ),
@@ -131,28 +132,46 @@ class RideHailingScreen extends StatelessWidget {
                         child: ListView(
                           scrollDirection: Axis.horizontal,
                           children: const [
-                            _RideOptionCard(title: 'Executive', price: '₦ 7,500', selected: true, badge: 'BEST'),
+                            _RideOptionCard(title: 'Executive', price: 'TSh 7,500', selected: true, badge: 'BEST'),
                             SizedBox(width: 12),
-                            _RideOptionCard(title: 'Standard', price: '₦ 4,200'),
+                            _RideOptionCard(title: 'Standard', price: 'TSh 4,200'),
                             SizedBox(width: 12),
-                            _RideOptionCard(title: 'Transit XL', price: '₦ 6,800', badge: 'XL'),
+                            _RideOptionCard(title: 'Transit XL', price: 'TSh 6,800', badge: 'XL'),
                           ],
                         ),
                       ),
                       const SizedBox(height: 14),
+                      const LiveTrackingCard(
+                        title: 'Live ride tracking',
+                        subtitle: 'Vehicle is being assigned from Kariakoo',
+                        distance: '2.1 km',
+                        eta: '4 min',
+                        status: 'LIVE',
+                        progress: 0.42,
+                        primaryActionLabel: 'Call Driver',
+                        secondaryActionLabel: 'Share Trip',
+                      ),
+                      const SizedBox(height: 14),
                       _DriverCard(),
                       const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          const Icon(Icons.bolt, color: AppColors.tertiary, size: 16),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'High demand: Prices slightly higher than usual',
-                              style: AppTypography.caption.copyWith(color: AppColors.tertiary),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: AppColors.tertiary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.bolt, color: AppColors.tertiary, size: 16),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'High demand: prices are slightly higher than usual',
+                                style: AppTypography.caption.copyWith(color: AppColors.tertiary),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 14),
                       SizedBox(
@@ -229,8 +248,8 @@ class _DriverCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Chidi A.', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                Text('4.9 • Lexus ES 350', style: TextStyle(fontSize: 12, color: AppColors.outline)),
+                Text('Asha M.', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                Text('4.9 • Toyota Premio', style: TextStyle(fontSize: 12, color: AppColors.outline)),
               ],
             ),
           ),

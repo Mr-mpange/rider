@@ -43,7 +43,7 @@ class HomeDashboardScreen extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 4, AppSpacing.marginMobile, 110),
                 children: [
-                  Text('Good morning, Alex', style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant, letterSpacing: 1.2)),
+                  Text('Good morning, Asha', style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant, letterSpacing: 1.2)),
                   const SizedBox(height: 6),
                   Text('Where are you going today?', style: AppTypography.headlineMdMobile.copyWith(color: AppColors.onSurface)),
                   const SizedBox(height: 12),
@@ -98,7 +98,7 @@ class HomeDashboardScreen extends StatelessWidget {
                             children: [
                               Text('RIDER WALLET', style: AppTypography.caption.copyWith(color: Colors.white70)),
                               const SizedBox(height: 4),
-                              Text('₦4,280.50', style: AppTypography.headlineMdMobile.copyWith(color: Colors.white)),
+                              Text('TSh 4,280.50', style: AppTypography.headlineMdMobile.copyWith(color: Colors.white)),
                             ],
                           ),
                         ),
@@ -127,7 +127,7 @@ class HomeDashboardScreen extends StatelessWidget {
                     childAspectRatio: 0.96,
                     children: [
                       _ServiceTile(icon: Icons.directions_car, label: 'Ride', onTap: () => context.push(AppRoutes.rideHailing)),
-                      _ServiceTile(icon: Icons.directions_bus, label: 'Bus Pool', onTap: () => context.push(AppRoutes.savedPlaces)),
+                      _ServiceTile(icon: Icons.directions_bus, label: 'Bus Pool', onTap: () => context.push(AppRoutes.busPool)),
                       _ServiceTile(icon: Icons.local_shipping, label: 'Freight', onTap: () => context.push(AppRoutes.cargo)),
                       _ServiceTile(icon: Icons.ac_unit, label: 'Cold Cargo', onTap: () => context.push(AppRoutes.cargo)),
                       _ServiceTile(icon: Icons.map_outlined, label: 'Routes', onTap: () => context.push(AppRoutes.savedPlaces)),
@@ -143,7 +143,7 @@ class HomeDashboardScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  _ActivityCard(title: 'Freight Shipment', subtitle: 'Sent to Lekki port', status: 'In Transit', statusColor: AppColors.secondary),
+                  _ActivityCard(title: 'Freight Shipment', subtitle: 'Sent to Dar Port', status: 'In Transit', statusColor: AppColors.secondary),
                   const SizedBox(height: 12),
                   _ActivityCard(title: 'Ride History', subtitle: 'December 26, 2024', status: 'COMPLETED', statusColor: AppColors.primary),
                   const SizedBox(height: 12),

@@ -30,7 +30,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _skip() async {
     await context.read<AppPreferences>().completeOnboarding();
-    if (mounted) context.go(AppRoutes.home);
+    if (mounted) context.go(AppRoutes.login);
   }
 
   void _next() {

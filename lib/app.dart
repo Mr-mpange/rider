@@ -32,11 +32,18 @@ class _RiderAppState extends State<RiderApp> {
         ChangeNotifierProvider(create: (_) => AuthService()),
         Provider(create: (_) => FirestoreService()),
       ],
-      child: MaterialApp.router(
-        title: 'Rider',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
-        routerConfig: _router,
+      child: Builder(
+        builder: (context) {
+          final localeCode = context.watch<AppPreferences>().localeCode;
+          return MaterialApp.router(
+            title: 'Rider',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light,
+            locale: Locale(localeCode),
+            supportedLocales: const [Locale('en'), Locale('sw')],
+            routerConfig: _router,
+          );
+        },
       ),
     );
   }

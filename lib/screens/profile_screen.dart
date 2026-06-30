@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../core/constants/image_urls.dart';
 import '../core/router/app_router.dart';
+import '../core/services/auth_service.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
@@ -14,6 +16,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthService>();
+    final profile = auth.currentUser;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -45,13 +49,13 @@ class ProfileScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Kwame Mensah', style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
-                        Text('Tier 1 Member', style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
+                        Text(profile?.displayName ?? 'Guest', style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
+                        Text(profile?.phoneNumber ?? 'No phone linked', style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
                         const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(color: AppColors.secondaryContainer.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(999)),
-                          child: Text('Verified Rider', style: AppTypography.caption.copyWith(color: AppColors.secondary)),
+                          child: Text(auth.isAuthenticated ? 'Verified Rider' : 'Not signed in', style: AppTypography.caption.copyWith(color: AppColors.secondary)),
                         ),
                       ],
                     ),
@@ -60,17 +64,41 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-            _ProfileTile(icon: Icons.history, title: 'Trip History'),
-            _ProfileTile(icon: Icons.payment, title: 'Payment Methods', onTap: () => context.push(AppRoutes.wallet)),
-            _ProfileTile(icon: Icons.security, title: 'Security & Privacy', onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Security settings are not yet wired.')))),
-            _ProfileTile(icon: Icons.help_outline, title: 'Support Center', onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Support is available from the admin panel.')))),
+            _ProfileTile(
+              icon: Icons.history,
+              title: 'Trip History',
+              onTap: () => context.push(AppRoutes.tripHistory),
+            ),
+            _ProfileTile(
+              icon: Icons.payment,
+              title: 'Payment Methods',
+              onTap: () => context.push(AppRoutes.paymentMethods),
+            ),
+            _ProfileTile(
+              icon: Icons.security,
+              title: 'Security & Privacy',
+              onTap: () => context.push(AppRoutes.securityPrivacy),
+            ),
+            _ProfileTile(
+              icon: Icons.help_outline,
+              title: 'Support Center',
+              onTap: () => context.push(AppRoutes.supportCenter),
+            ),
+            _ProfileTile(
+              icon: Icons.language,
+              title: 'Language',
+              onTap: () => context.push(AppRoutes.language),
+            ),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () => context.go(AppRoutes.home),
+                onPressed: () async {
+                  await context.read<AuthService>().signOut();
+                  if (context.mounted) context.go(AppRoutes.login);
+                },
                 icon: const Icon(Icons.logout, color: AppColors.error),
-                label: Text('Back to Home', style: AppTypography.bodyMd.copyWith(color: AppColors.error)),
+                label: Text('Logout', style: AppTypography.bodyMd.copyWith(color: AppColors.error)),
               ),
             ),
           ],
