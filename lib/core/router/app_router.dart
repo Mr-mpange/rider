@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rider/core/services/app_preferences.dart';
 import 'package:rider/core/services/auth_service.dart';
 import 'package:rider/screens/active_trip_screen.dart';
@@ -56,12 +56,14 @@ abstract final class AppRoutes {
   static const copilot = '/copilot';
 }
 
-GoRouter createRouter() {
+GoRouter createRouter({
+  required AppPreferences prefs,
+  required AuthService auth,
+}) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
+    refreshListenable: Listenable.merge([prefs, auth]),
     redirect: (context, state) {
-      final prefs = context.read<AppPreferences>();
-      final auth = context.read<AuthService>();
       final path = state.matchedLocation;
 
       if (!prefs.initialized && path != AppRoutes.splash) {

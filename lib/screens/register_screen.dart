@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../core/constants/app_branding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -54,9 +55,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
             password: password,
           );
       if (mounted) context.go(AppRoutes.home);
-    } catch (e) {
+    } on FirebaseAuthException catch (e) {
       if (mounted) {
-        setState(() => _error = 'Imeshindikana kusajili akaunti');
+        setState(() => _error = _friendlyAuthMessage(e));
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _error = 'Unable to register account');
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -73,29 +78,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go(AppRoutes.login);
-            }
-          },
+    return Localizations.override(
+      context: context,
+      locale: const Locale('en'),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go(AppRoutes.login);
+              }
+            },
+          ),
+          title: Text(
+            AppBranding.appName,
+            style: AppTypography.textTheme.displayLarge?.copyWith(fontSize: 24, color: AppColors.primary),
+          ),
+          centerTitle: true,
         ),
-        title: Text(
-          AppBranding.appName,
-          style: AppTypography.textTheme.displayLarge?.copyWith(fontSize: 24, color: AppColors.primary),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.marginMobile),
-          child: Column(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.marginMobile),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Create a Rider account', style: AppTypography.headlineMdMobile),
@@ -145,10 +153,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
             ],
+            ),
           ),
         ),
       ),
     );
+  }
+}
+
+String _friendlyAuthMessage(FirebaseAuthException e) {
+  switch (e.code) {
+    case 'email-already-in-use':
+      return 'This email is already in use';
+    case 'invalid-email':
+      return 'Enter a valid email address';
+    case 'weak-password':
+      return 'Password is too weak';
+    case 'operation-not-allowed':
+      return 'Email/password sign-in is not enabled in Firebase';
+    case 'network-request-failed':
+      return 'Network unavailable. Try again';
+    default:
+      return e.message ?? 'Unable to register account';
   }
 }
 

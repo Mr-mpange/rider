@@ -58,6 +58,7 @@ class _DestinationAlertScreenState extends State<DestinationAlertScreen>
 
   @override
   Widget build(BuildContext context) {
+    final userId = context.read<AuthService>().currentUser?.uid;
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -78,6 +79,44 @@ class _DestinationAlertScreenState extends State<DestinationAlertScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    if (userId != null)
+                      StreamBuilder<Map<String, dynamic>?>(
+                        stream: context.read<FirestoreService>().watchActiveTrip(userId),
+                        builder: (context, snapshot) {
+                          final trip = snapshot.data;
+                          if (trip == null) {
+                            return const SizedBox.shrink();
+                          }
+                          return Container(
+                            width: double.infinity,
+                            constraints: const BoxConstraints(maxWidth: 400),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.directions_car_rounded, color: AppColors.primary),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('${trip['driverName'] ?? 'Live trip'}', style: AppTypography.labelMd),
+                                      Text(
+                                        '${trip['vehicleName'] ?? ''} • ETA ${trip['etaMinutes'] ?? 0} min',
+                                        style: AppTypography.caption,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     Container(
                       width: double.infinity,
                       constraints: const BoxConstraints(maxWidth: 400),

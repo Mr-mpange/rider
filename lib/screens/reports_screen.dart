@@ -11,6 +11,7 @@ import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
 import '../widgets/app_bottom_nav_bar.dart';
 import '../widgets/app_button.dart';
+import '../widgets/glass_card.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -119,6 +120,34 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: context.read<FirestoreService>().watchReports(limit: 5),
+                    builder: (context, snapshot) {
+                      final reports = snapshot.data ?? const [];
+                      return GlassCard(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.inbox_outlined, color: AppColors.primary),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Live reports', style: AppTypography.labelMd),
+                                  Text(
+                                    '${reports.length} recent issue${reports.length == 1 ? '' : 's'} synced to Firestore.',
+                                    style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
                   Text(
                     'SELECT REPORT TYPE',
                     style: AppTypography.textTheme.labelLarge?.copyWith(
@@ -187,6 +216,47 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     label: 'Submit Report',
                     onPressed: _submitting ? null : _submit,
                     enabled: !_submitting,
+                  ),
+                  const SizedBox(height: 20),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: context.read<FirestoreService>().watchReports(limit: 3),
+                    builder: (context, snapshot) {
+                      final reports = snapshot.data ?? const [];
+                      if (reports.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Recent submissions', style: AppTypography.labelMd),
+                          const SizedBox(height: 10),
+                          ...reports.map(
+                            (report) => Container(
+                              margin: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceContainerLowest,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.3)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('${report['type'] ?? 'Report'}', style: AppTypography.labelMd),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${report['description'] ?? ''}',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -30,18 +31,13 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     if (email.isEmpty) {
-      setState(() => _error = 'Enter your email or phone');
+      setState(() => _error = 'Enter your email');
       return;
     }
     if (password.isEmpty) {
       setState(() => _error = 'Enter your password');
       return;
     }
-    if (!email.contains('@')) {
-      setState(() => _error = 'Use a valid email for sign in');
-      return;
-    }
-
     setState(() {
       _busy = true;
       _error = null;
@@ -50,8 +46,10 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await context.read<AuthService>().signInWithEmail(email: email, password: password);
       if (mounted) context.go(AppRoutes.home);
-    } catch (e) {
-      if (mounted) setState(() => _error = 'Email au password si sahihi');
+    } on FirebaseAuthException catch (e) {
+      if (mounted) setState(() => _error = _friendlyAuthMessage(e));
+    } catch (_) {
+      if (mounted) setState(() => _error = 'Email or password is incorrect');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -66,14 +64,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.marginMobile),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return Localizations.override(
+      context: context,
+      locale: const Locale('en'),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.marginMobile),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Row(
                 children: [
                   Text(AppBranding.appName, style: AppTypography.labelMd.copyWith(color: AppColors.primary, letterSpacing: 2)),
@@ -124,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 24),
                     _Field(
                       controller: _emailController,
-                      label: 'EMAIL OR PHONE',
+                      label: 'EMAIL',
                       hint: 'name@example.com',
                       icon: Icons.alternate_email,
                       keyboardType: TextInputType.emailAddress,
@@ -176,12 +177,25 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () => AppDialogs.showInfoSheet(
-                              context,
-                              title: 'Google Sign In',
-                              body: 'Continue with your Google workspace account.',
-                              cta: 'Continue',
-                            ),
+                            onPressed: _busy
+                                ? null
+                                : () async {
+                                    setState(() {
+                                      _busy = true;
+                                      _error = null;
+                                    });
+                                    try {
+                                      await context.read<AuthService>().signInWithGoogle();
+                                      if (!context.mounted) return;
+                                      context.go(AppRoutes.home);
+                                    } catch (_) {
+                                      if (mounted) {
+                                        setState(() => _error = 'Google sign in is not available right now');
+                                      }
+                                    } finally {
+                                      if (mounted) setState(() => _busy = false);
+                                    }
+                                  },
                             icon: const Icon(Icons.g_mobiledata, size: 22),
                             label: const Text('Google'),
                           ),
@@ -253,10 +267,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ],
+            ),
           ),
         ),
       ),
     );
+  }
+}
+
+String _friendlyAuthMessage(FirebaseAuthException e) {
+  switch (e.code) {
+    case 'invalid-email':
+      return 'Enter a valid email address';
+    case 'user-not-found':
+      return 'No account found for this email';
+    case 'wrong-password':
+    case 'invalid-credential':
+      return 'Email or password is incorrect';
+    case 'user-disabled':
+      return 'This account is disabled';
+    case 'operation-not-allowed':
+      return 'Email/password sign-in is not enabled in Firebase';
+    case 'network-request-failed':
+      return 'Network unavailable. Try again';
+    default:
+      return e.message ?? 'Unable to sign in';
   }
 }
 

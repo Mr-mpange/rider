@@ -10,8 +10,10 @@ import '../core/services/firestore_service.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../core/utils/navigation_utils.dart';
 import '../widgets/app_bottom_nav_bar.dart';
 import '../widgets/app_button.dart';
+import '../widgets/glass_card.dart';
 import '../widgets/shimmer_loading.dart';
 
 class SavedPlacesScreen extends StatelessWidget {
@@ -28,7 +30,7 @@ class SavedPlacesScreen extends StatelessWidget {
           AppBar(
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: AppColors.onSurfaceVariant),
-              onPressed: () => context.go(AppRoutes.home),
+              onPressed: () => popOrGoHome(context),
             ),
             title: Text(
               AppBranding.appName,
@@ -59,6 +61,48 @@ class SavedPlacesScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  StreamBuilder<List<SavedPlace>>(
+                    stream: userId == null
+                        ? Stream<List<SavedPlace>>.value(const [])
+                        : context.read<FirestoreService>().watchSavedPlaces(userId),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return const Padding(
+                          padding: EdgeInsets.only(bottom: 16),
+                          child: _StateCard(
+                            icon: Icons.error_outline,
+                            title: 'Saved places unavailable',
+                            body: 'Could not load your Firestore places right now.',
+                          ),
+                        );
+                      }
+                      final count = snapshot.data?.length ?? 0;
+                      return GlassCard(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.bookmark_outline, color: AppColors.primary),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Saved places sync', style: AppTypography.labelMd),
+                                  Text(
+                                    userId == null
+                                        ? 'Sign in to sync your places to Firestore.'
+                                        : '$count places synced to your account.',
+                                    style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
                   AppButton(
                     label: 'Add New Place',
                     icon: Icons.add_location_alt,
@@ -66,17 +110,35 @@ class SavedPlacesScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   if (userId == null)
-                    const Center(child: Text('Log in first to see your places'))
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          children: [
+                            const Icon(Icons.lock_outline, size: 40, color: AppColors.outline),
+                            const SizedBox(height: 12),
+                            Text('Log in first to see your places', style: AppTypography.labelMd),
+                          ],
+                        ),
+                      ),
+                    )
                   else
                     StreamBuilder<List<SavedPlace>>(
                       stream: context.read<FirestoreService>().watchSavedPlaces(userId),
                       builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return const _StateCard(
+                            icon: Icons.error_outline,
+                            title: 'Saved places error',
+                            body: 'Try again after reconnecting to Firestore.',
+                          );
+                        }
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const ShimmerLoading();
                         }
                         final places = snapshot.data ?? [];
                         if (places.isEmpty) {
-                          return _EmptySavedPlaces();
+                          return _EmptySavedPlaces(onAdd: () => _showAddPlaceDialog(context));
                         }
                         return Column(
                           children: places.map((p) => _SavedPlaceCard(place: p)).toList(),
@@ -177,7 +239,48 @@ class SavedPlacesScreen extends StatelessWidget {
   }
 }
 
+class _StateCard extends StatelessWidget {
+  const _StateCard({required this.icon, required this.title, required this.body});
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppTypography.labelMd),
+                const SizedBox(height: 4),
+                Text(body, style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _EmptySavedPlaces extends StatelessWidget {
+  const _EmptySavedPlaces({required this.onAdd});
+
+  final VoidCallback onAdd;
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -185,9 +288,17 @@ class _EmptySavedPlaces extends StatelessWidget {
         padding: const EdgeInsets.all(32),
         child: Column(
           children: [
-            const Icon(Icons.bookmark_border, size: 48, color: AppColors.outline),
+            const Icon(Icons.bookmark_border, size: 52, color: AppColors.outline),
             const SizedBox(height: 16),
             Text('No saved places yet', style: AppTypography.textTheme.bodyLarge),
+            const SizedBox(height: 8),
+            Text(
+              'Add Home, Work, or any frequent stop to keep them in Firestore.',
+              textAlign: TextAlign.center,
+              style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant),
+            ),
+            const SizedBox(height: 16),
+            AppButton(label: 'Add Place', onPressed: onAdd),
           ],
         ),
       ),
@@ -245,6 +356,11 @@ class _SavedPlaceCard extends StatelessWidget {
                   style: AppTypography.textTheme.bodyMedium?.copyWith(
                     color: AppColors.onSurfaceVariant,
                   ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Synced to Firestore',
+                  style: AppTypography.caption.copyWith(color: AppColors.primary),
                 ),
               ],
             ),

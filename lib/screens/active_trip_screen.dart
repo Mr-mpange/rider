@@ -3,7 +3,10 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 
+import '../core/services/auth_service.dart';
+import '../core/services/firestore_service.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_typography.dart';
 import '../core/utils/navigation_utils.dart';
@@ -38,92 +41,100 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userId = context.watch<AuthService>().currentUser?.uid;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
           Positioned.fill(
-            child: FlutterMap(
-              mapController: _mapController,
-              options: MapOptions(
-                initialCenter: _center,
-                initialZoom: 13.5,
-                interactionOptions: const InteractionOptions(
-                  flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom,
-                ),
-              ),
-                children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.usafir.rider',
-                  errorImage: MemoryImage(transparentPngBytes()),
-                  errorTileCallback: (tile, error, stackTrace) {
-                    if (!_mapOffline && mounted) {
-                      setState(() => _mapOffline = true);
-                    }
-                  },
-                ),
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: _route,
-                      strokeWidth: 6,
-                      color: AppColors.primary,
-                    ),
-                  ],
-                ),
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _pickup,
-                      width: 42,
-                      height: 42,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.secondaryContainer, width: 4),
-                        ),
-                        child: const Icon(Icons.storefront_rounded, color: AppColors.secondary, size: 18),
+            child: _mapOffline
+                ? _OfflineMapFallback(
+                    route: _route,
+                    driver: _driver,
+                    pickup: _pickup,
+                    dropoff: _dropoff,
+                  )
+                : FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      initialCenter: _center,
+                      initialZoom: 13.5,
+                      interactionOptions: const InteractionOptions(
+                        flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom,
                       ),
                     ),
-                    Marker(
-                      point: _driver,
-                      width: 68,
-                      height: 68,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 5),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.30),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
+                    children: [
+                      TileLayer(
+                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.usafir.rider',
+                        errorImage: MemoryImage(transparentPngBytes()),
+                        errorTileCallback: (tile, error, stackTrace) {
+                          if (!_mapOffline && mounted) {
+                            setState(() => _mapOffline = true);
+                          }
+                        },
+                      ),
+                      PolylineLayer(
+                        polylines: [
+                          Polyline(
+                            points: _route,
+                            strokeWidth: 6,
+                            color: AppColors.primary,
+                          ),
+                        ],
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: _pickup,
+                            width: 42,
+                            height: 42,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: AppColors.secondaryContainer, width: 4),
+                              ),
+                              child: const Icon(Icons.storefront_rounded, color: AppColors.secondary, size: 18),
                             ),
-                          ],
-                        ),
-                        child: const Icon(Icons.directions_car_rounded, color: Colors.white, size: 30),
+                          ),
+                          Marker(
+                            point: _driver,
+                            width: 68,
+                            height: 68,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withValues(alpha: 0.30),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(Icons.directions_car_rounded, color: Colors.white, size: 30),
+                            ),
+                          ),
+                          Marker(
+                            point: _dropoff,
+                            width: 42,
+                            height: 42,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: AppColors.secondaryContainer, width: 4),
+                              ),
+                              child: const Icon(Icons.flag_rounded, color: AppColors.secondary, size: 18),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    Marker(
-                      point: _dropoff,
-                      width: 42,
-                      height: 42,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.secondaryContainer, width: 4),
-                        ),
-                        child: const Icon(Icons.flag_rounded, color: AppColors.secondary, size: 18),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                    ],
+                  ),
           ),
           Positioned.fill(
             child: IgnorePointer(
@@ -151,6 +162,44 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
               child: _OfflineBanner(
                 title: 'Map offline',
                 body: 'Showing the trip layout while live map tiles reconnect.',
+              ),
+            ),
+          if (userId != null)
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 92,
+              child: StreamBuilder<Map<String, dynamic>?>(
+                stream: context.read<FirestoreService>().watchActiveTrip(userId),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const _TripStateBanner(
+                      icon: Icons.error_outline,
+                      title: 'Trip status unavailable',
+                      body: 'Firestore could not load the active trip right now.',
+                    );
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const _TripStateBanner(
+                      icon: Icons.watch_later_outlined,
+                      title: 'Loading trip',
+                      body: 'Checking your active trip in Firestore.',
+                    );
+                  }
+                  final trip = snapshot.data;
+                  if (trip == null) {
+                    return const _TripStateBanner(
+                      icon: Icons.trip_origin,
+                      title: 'No active trip',
+                      body: 'Start a trip from Home to see live tracking here.',
+                    );
+                  }
+                  return _TripStateBanner(
+                    icon: Icons.local_taxi_rounded,
+                    title: '${trip['status'] ?? 'Live'} trip',
+                    body: '${trip['destination'] ?? 'Unknown destination'} • ETA ${trip['etaMinutes'] ?? 4} min',
+                  );
+                },
               ),
             ),
           SafeArea(
@@ -205,6 +254,100 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TripStateBanner extends StatelessWidget {
+  const _TripStateBanner({required this.icon, required this.title, required this.body});
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.82),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: AppColors.primary),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(title, style: AppTypography.labelMd),
+                    const SizedBox(height: 4),
+                    Text(body, style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OfflineMapFallback extends StatelessWidget {
+  const _OfflineMapFallback({
+    required this.route,
+    required this.driver,
+    required this.pickup,
+    required this.dropoff,
+  });
+
+  final List<LatLng> route;
+  final LatLng driver;
+  final LatLng pickup;
+  final LatLng dropoff;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFFEFF4F8), Color(0xFFDCE7F0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.map_outlined, size: 44, color: AppColors.primary),
+              const SizedBox(height: 12),
+              Text('Live map offline', style: AppTypography.labelMd),
+              const SizedBox(height: 6),
+              Text(
+                'Route markers and trip status are still available while tiles reconnect.',
+                textAlign: TextAlign.center,
+                style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

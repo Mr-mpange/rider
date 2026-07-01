@@ -1,0 +1,89 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    match /users/{userId} {
+      allow read, create, update: if isSelf(userId) || isAdmin();
+      allow delete: if isAdmin();
+
+      match /saved_places/{docId} {
+        allow read, write: if isSelf(userId) || isAdmin();
+      }
+
+      match /recent_destinations/{docId} {
+        allow read, write: if isSelf(userId) || isAdmin();
+      }
+    }
+
+    match /bus_stops/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /popular_locations/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /routes/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /active_trips/{userId} {
+      allow read, write: if isSelf(userId) || isAdmin();
+    }
+
+    match /reports/{docId} {
+      allow create: if signedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /admin_stats/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /ride_requests/{docId} {
+      allow read, create: if signedIn();
+      allow update, delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    match /locations/{docId} {
+      allow read, write: if signedIn();
+    }
+
+    match /notifications/{docId} {
+      allow read, write: if signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /payments/{docId} {
+      allow read: if signedIn() && resource.data.userId == request.auth.uid;
+      allow write: if isAdmin();
+    }
+
+    match /ratings/{docId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin() || resource.data.userId == request.auth.uid;
+    }
+
+    match /support_messages/{docId} {
+      allow read, create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+  }
+}

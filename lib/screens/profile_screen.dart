@@ -7,6 +7,7 @@ import '../core/constants/app_branding.dart';
 import '../core/constants/image_urls.dart';
 import '../core/router/app_router.dart';
 import '../core/services/auth_service.dart';
+import '../core/models/user_profile.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
@@ -22,6 +23,8 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
     final profile = auth.currentUser;
+    final tripsCompleted = profile?.tripCount ?? 0;
+    final ratingBadge = tripsCompleted >= 25 ? 'Top Rated' : tripsCompleted >= 10 ? 'Rising Star' : 'New Rider';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -35,15 +38,34 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: Row(
                 children: [
-                  CircleAvatar(radius: 34, backgroundImage: CachedNetworkImageProvider(ImageUrls.profileAvatar)),
+                  ClipOval(
+                    child: CachedNetworkImage(
+                      imageUrl: ImageUrls.profileAvatar,
+                      width: 68,
+                      height: 68,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        width: 68,
+                        height: 68,
+                        color: AppColors.surfaceContainerLow,
+                        child: const Icon(Icons.person, size: 32, color: AppColors.primary),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        width: 68,
+                        height: 68,
+                        color: AppColors.surfaceContainerLow,
+                        child: const Icon(Icons.person, size: 32, color: AppColors.primary),
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(profile?.displayName ?? 'Alex Sterling', style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
+                        Text(profile?.displayName ?? 'Rider User', style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
                         Text(
-                          'Enterprise Logistics Admin • Premium Account',
+                          profile?.email.isNotEmpty == true ? profile!.email : 'Enterprise Logistics Admin',
                           style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
                         ),
                         const SizedBox(height: 8),
@@ -52,11 +74,12 @@ class ProfileScreen extends StatelessWidget {
                           runSpacing: 8,
                           children: [
                             _Badge(
-                              label: auth.isAuthenticated ? 'Verified Driver' : 'Unverified',
-                              color: auth.isAuthenticated ? AppColors.secondary : AppColors.outline,
-                              icon: auth.isAuthenticated ? Icons.verified : Icons.info_outline,
+                              label: profile?.isVerified == true ? 'Verified' : 'Unverified',
+                              color: profile?.isVerified == true ? AppColors.secondary : AppColors.outline,
+                              icon: profile?.isVerified == true ? Icons.verified : Icons.info_outline,
                             ),
-                            const _Badge(label: 'Top Rated', color: AppColors.primary),
+                            _Badge(label: ratingBadge, color: AppColors.primary),
+                            _Badge(label: '$tripsCompleted trips', color: AppColors.secondaryContainer),
                           ],
                         ),
                       ],
@@ -138,7 +161,13 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text('Current Balance', style: AppTypography.caption),
                   const SizedBox(height: 4),
-                  Text('TSh 142,580.00', style: AppTypography.headlineMdMobile.copyWith(fontSize: 22)),
+                  StreamBuilder<UserProfile?>(
+                    stream: auth.watchUserProfile(),
+                    builder: (context, snapshot) {
+                      final balance = snapshot.data?.balanceTzs ?? profile?.balanceTzs ?? 0;
+                      return Text('TSh ${balance.toStringAsFixed(2)}', style: AppTypography.headlineMdMobile.copyWith(fontSize: 22));
+                    },
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -156,14 +185,14 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 10),
             SettingsTile(
               icon: Icons.credit_card,
-              title: 'Visa •••• 4421',
-              subtitle: 'Expires 12/26 • Primary',
+              title: 'Linked cards',
+              subtitle: 'Manage wallet funding sources',
               onTap: () => context.push(AppRoutes.paymentMethods),
             ),
             SettingsTile(
               icon: Icons.payments_outlined,
-              title: 'PayPal',
-              subtitle: 'alex.s@sterling.com',
+              title: 'Payment profile',
+              subtitle: profile?.phoneNumber.isNotEmpty == true ? profile!.phoneNumber : 'Add email for payouts',
               onTap: () => context.push(AppRoutes.paymentMethods),
             ),
             const SizedBox(height: 16),

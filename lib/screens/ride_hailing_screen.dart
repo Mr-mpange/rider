@@ -67,66 +67,68 @@ class _RideHailingScreenState extends State<RideHailingScreen> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: FlutterMap(
-              mapController: _mapController,
-              options: MapOptions(
-                initialCenter: LatLng(-6.786, 39.220),
-                initialZoom: 13.1,
-                interactionOptions: const InteractionOptions(
-                  flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom,
-                ),
-              ),
-                children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.usafir.rider',
-                  errorImage: MemoryImage(transparentPngBytes()),
-                  errorTileCallback: (tile, error, stackTrace) {
-                    if (!_mapOffline && mounted) {
-                      setState(() => _mapOffline = true);
-                    }
-                  },
-                ),
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: [_pickup, LatLng(-6.7900, 39.2140), _destination],
-                      strokeWidth: 5,
-                      color: AppColors.primary.withValues(alpha: 0.85),
-                    ),
-                  ],
-                ),
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _pickup,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(Icons.my_location, color: AppColors.primary, size: 28),
-                    ),
-                    Marker(
-                      point: _driver,
-                      width: 52,
-                      height: 52,
-          child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 4),
-                        ),
-                        child: const Icon(Icons.directions_car_rounded, color: Colors.white, size: 24),
+            child: _mapOffline
+                ? const _OfflineRideMap()
+                : FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      initialCenter: LatLng(-6.786, 39.220),
+                      initialZoom: 13.1,
+                      interactionOptions: const InteractionOptions(
+                        flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom,
                       ),
                     ),
-                    Marker(
-                      point: _destination,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(Icons.location_pin, color: AppColors.secondary, size: 34),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                    children: [
+                      TileLayer(
+                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.usafir.rider',
+                        errorImage: MemoryImage(transparentPngBytes()),
+                        errorTileCallback: (tile, error, stackTrace) {
+                          if (!_mapOffline && mounted) {
+                            setState(() => _mapOffline = true);
+                          }
+                        },
+                      ),
+                      PolylineLayer(
+                        polylines: [
+                          Polyline(
+                            points: [_pickup, LatLng(-6.7900, 39.2140), _destination],
+                            strokeWidth: 5,
+                            color: AppColors.primary.withValues(alpha: 0.85),
+                          ),
+                        ],
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: _pickup,
+                            width: 40,
+                            height: 40,
+                            child: const Icon(Icons.my_location, color: AppColors.primary, size: 28),
+                          ),
+                          Marker(
+                            point: _driver,
+                            width: 52,
+                            height: 52,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 4),
+                              ),
+                              child: const Icon(Icons.directions_car_rounded, color: Colors.white, size: 24),
+                            ),
+                          ),
+                          Marker(
+                            point: _destination,
+                            width: 40,
+                            height: 40,
+                            child: const Icon(Icons.location_pin, color: AppColors.secondary, size: 34),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
           ),
           Positioned(
             right: 16,
@@ -390,6 +392,47 @@ class _RideHailingScreenState extends State<RideHailingScreen> {
     if (selected != null && selected.isNotEmpty) {
       setState(() => _pickupController.text = selected);
     }
+  }
+}
+
+class _OfflineRideMap extends StatelessWidget {
+  const _OfflineRideMap();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFFEFF4F8), Color(0xFFDCE7F0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.wifi_off_rounded, size: 44, color: AppColors.primary),
+              const SizedBox(height: 12),
+              Text('Live map offline', style: AppTypography.labelMd),
+              const SizedBox(height: 6),
+              Text(
+                'Trip tracking stays available while map tiles reconnect.',
+                textAlign: TextAlign.center,
+                style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

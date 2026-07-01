@@ -12,85 +12,108 @@ class AdminDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Row(
-        children: [
-          _Sidebar(onBack: () => context.pop()),
-          Expanded(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= 900;
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          drawer: wide ? null : Drawer(child: _Sidebar(onBack: () => context.pop(), compact: true)),
+          body: wide
+              ? Row(
+                  children: [
+                    _Sidebar(onBack: () => context.pop()),
+                    const Expanded(child: _AdminContent(showTopBar: true)),
+                  ],
+                )
+              : Column(
+                  children: [
+                    _TopBar(onMenuTap: () => Scaffold.of(context).openDrawer()),
+                    const Expanded(child: _AdminContent(showTopBar: false)),
+                  ],
+                ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Quick admin action not wired.'))),
+            backgroundColor: AppColors.primary,
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AdminContent extends StatelessWidget {
+  const _AdminContent({required this.showTopBar});
+
+  final bool showTopBar;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (showTopBar) _TopBar(onMenuTap: () => Scaffold.of(context).openDrawer()),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _TopBar(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                Text('Overview', style: AppTypography.headlineMdMobile.copyWith(fontSize: 22)),
+                const SizedBox(height: 14),
+                StreamBuilder<Map<String, dynamic>>(
+                  stream: context.read<FirestoreService>().watchAdminStats(),
+                  builder: (context, snapshot) {
+                    final stats = snapshot.data ?? {};
+                    return Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
                       children: [
-                        Text('Overview', style: AppTypography.headlineMdMobile.copyWith(fontSize: 22)),
-                        const SizedBox(height: 14),
-                        StreamBuilder<Map<String, dynamic>>(
-                          stream: context.read<FirestoreService>().watchAdminStats(),
-                          builder: (context, snapshot) {
-                            final stats = snapshot.data ?? {};
-                            return Wrap(
-                              spacing: 12,
-                              runSpacing: 12,
-                              children: [
-                                _StatBox(label: 'Active Users', value: '${stats['activeUsers'] ?? '1,248'}', color: AppColors.primary),
-                                _StatBox(label: 'Trips Today', value: '${stats['tripsToday'] ?? '342'}', color: AppColors.secondary),
-                                _StatBox(label: 'Searches', value: '${stats['searches'] ?? '12.5k'}', color: AppColors.tertiary),
-                                _StatBox(label: 'New Reports', value: '${stats['newReports'] ?? '42'}', color: AppColors.error),
-                              ],
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 18),
-                        Text('Recent User Reports', style: AppTypography.labelMd),
-                        const SizedBox(height: 10),
-                        StreamBuilder<List<Map<String, dynamic>>>(
-                          stream: context.read<FirestoreService>().watchReports(limit: 5),
-                          builder: (context, snapshot) {
-                            final reports = snapshot.data ?? [];
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()));
-                            }
-                            if (reports.isEmpty) {
-                                return Text('No recent reports', style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant));
-                            }
-                            return Column(children: reports.map((r) => _ReportRow(report: r)).toList());
-                          },
-                        ),
-                        const SizedBox(height: 14),
-                        TextButton(
-                          onPressed: () => context.push('/reports'),
-                          child: const Text('View all reports'),
-                        ),
+                        _StatBox(label: 'Active Users', value: '${stats['activeUsers'] ?? '1,248'}', color: AppColors.primary),
+                        _StatBox(label: 'Trips Today', value: '${stats['tripsToday'] ?? '342'}', color: AppColors.secondary),
+                        _StatBox(label: 'Searches', value: '${stats['searches'] ?? '12.5k'}', color: AppColors.tertiary),
+                        _StatBox(label: 'New Reports', value: '${stats['newReports'] ?? '42'}', color: AppColors.error),
                       ],
-                    ),
-                  ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 18),
+                Text('Recent User Reports', style: AppTypography.labelMd),
+                const SizedBox(height: 10),
+                StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: context.read<FirestoreService>().watchReports(limit: 5),
+                  builder: (context, snapshot) {
+                    final reports = snapshot.data ?? [];
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()));
+                    }
+                    if (reports.isEmpty) {
+                      return Text('No recent reports', style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant));
+                    }
+                    return Column(children: reports.map((r) => _ReportRow(report: r)).toList());
+                  },
+                ),
+                const SizedBox(height: 14),
+                TextButton(
+                  onPressed: () => context.push('/reports'),
+                  child: const Text('View all reports'),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Quick admin action not wired.'))),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+        ),
+      ],
     );
   }
 }
 
 class _Sidebar extends StatelessWidget {
-  const _Sidebar({required this.onBack});
+  const _Sidebar({required this.onBack, this.compact = false});
   final VoidCallback onBack;
+  final bool compact;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 272,
+    final body = Container(
+      width: compact ? double.infinity : 272,
       color: AppColors.surfaceContainerLowest,
       child: SafeArea(
         child: Column(
@@ -100,21 +123,31 @@ class _Sidebar extends StatelessWidget {
               padding: EdgeInsets.all(22),
               child: Text(AppBranding.appName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.primary)),
             ),
-            _NavItem(icon: Icons.dashboard_outlined, label: 'Overview', active: true),
-            _NavItem(icon: Icons.place_outlined, label: 'Nearby Stops', onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nearby stops not wired.')))),
-            _NavItem(icon: Icons.local_shipping_outlined, label: 'Freight', onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Freight management not wired.')))),
-            _NavItem(icon: Icons.report_outlined, label: 'Reports', onTap: () => context.push('/reports')),
-            _NavItem(icon: Icons.settings_outlined, label: 'Settings', onTap: () => context.push('/profile')),
-            const Spacer(),
-            ListTile(
-              leading: const Icon(Icons.arrow_back),
-              title: const Text('Back to App'),
-              onTap: onBack,
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _NavItem(icon: Icons.dashboard_outlined, label: 'Overview', active: true),
+                  _NavItem(icon: Icons.place_outlined, label: 'Nearby Stops', onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nearby stops not wired.')))),
+                  _NavItem(icon: Icons.local_shipping_outlined, label: 'Freight', onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Freight management not wired.')))),
+                  _NavItem(icon: Icons.report_outlined, label: 'Reports', onTap: () => context.push('/reports')),
+                  _NavItem(icon: Icons.settings_outlined, label: 'Settings', onTap: () => context.push('/profile')),
+                ],
+              ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                leading: const Icon(Icons.arrow_back),
+                title: const Text('Back to App'),
+                onTap: onBack,
+              ),
             ),
           ],
         ),
       ),
     );
+    return compact ? body : body;
   }
 }
 
@@ -144,6 +177,8 @@ class _NavItem extends StatelessWidget {
 }
 
 class _TopBar extends StatelessWidget {
+  const _TopBar({this.onMenuTap});
+  final VoidCallback? onMenuTap;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -155,6 +190,11 @@ class _TopBar extends StatelessWidget {
       ),
       child: Row(
         children: [
+          if (onMenuTap != null)
+            IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: onMenuTap,
+            ),
           Text('Overview', style: AppTypography.headlineMdMobile.copyWith(fontSize: 20)),
           const Spacer(),
           IconButton(

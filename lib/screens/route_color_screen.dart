@@ -30,6 +30,7 @@ class RouteColorScreen extends StatelessWidget {
             userId: userId,
             routeId: routeId,
             destination: destination,
+            routeColor: routeColor,
           );
     }
     if (context.mounted) {

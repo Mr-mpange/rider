@@ -1,9 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../core/constants/image_urls.dart';
 import '../core/router/app_router.dart';
+import '../core/services/auth_service.dart';
+import '../core/services/firestore_service.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
@@ -24,9 +27,25 @@ class HomeDashboardScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 8),
               child: RiiderHeader(
                 onMenu: () => context.push(AppRoutes.admin),
-                trailing: CircleAvatar(
-                  radius: 14,
-                  backgroundImage: CachedNetworkImageProvider(ImageUrls.headerAvatar),
+                trailing: ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: ImageUrls.headerAvatar,
+                    width: 28,
+                    height: 28,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      width: 28,
+                      height: 28,
+                      color: AppColors.surfaceContainerLow,
+                      child: const Icon(Icons.person, size: 16, color: AppColors.primary),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      width: 28,
+                      height: 28,
+                      color: AppColors.surfaceContainerLow,
+                      child: const Icon(Icons.person, size: 16, color: AppColors.primary),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -69,6 +88,58 @@ class HomeDashboardScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: context.read<FirestoreService>().watchActiveTrips(
+                          userId: context.read<AuthService>().currentUser?.uid,
+                        ),
+                    builder: (context, snapshot) {
+                      final trips = snapshot.data ?? const [];
+                      if (trips.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      final trip = trips.first;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: InkWell(
+                          onTap: () => context.push(
+                            AppRoutes.activeTrip,
+                            extra: {
+                              'destination': trip['destination'] ?? 'Live destination',
+                              'routeId': trip['routeId'] ?? 'live-route',
+                            },
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          child: Container(
+                            padding: const EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.directions_car_rounded, color: Colors.white),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Active Trip', style: AppTypography.caption.copyWith(color: Colors.white70)),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${trip['driverName'] ?? 'Live driver'} • ETA ${trip['etaMinutes'] ?? 0} min',
+                                        style: AppTypography.labelMd.copyWith(color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right_rounded, color: Colors.white),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   InkWell(
                     onTap: () => context.push(AppRoutes.wallet),
                     borderRadius: BorderRadius.circular(24),

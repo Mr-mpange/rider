@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -17,16 +18,23 @@ class RiderApp extends StatefulWidget {
 }
 
 class _RiderAppState extends State<RiderApp> {
-  late final GoRouter _router;
+  GoRouter? _router;
 
   @override
   void initState() {
     super.initState();
-    _router = createRouter();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (Firebase.apps.isEmpty) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AppPreferences()),
@@ -35,14 +43,17 @@ class _RiderAppState extends State<RiderApp> {
       ],
       child: Builder(
         builder: (context) {
-          final localeCode = context.watch<AppPreferences>().localeCode;
+          final prefs = context.watch<AppPreferences>();
+          final auth = context.watch<AuthService>();
+          _router ??= createRouter(prefs: prefs, auth: auth);
+          final localeCode = prefs.localeCode;
           return MaterialApp.router(
             title: AppBranding.appTitle,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light,
             locale: Locale(localeCode),
             supportedLocales: const [Locale('en'), Locale('sw')],
-            routerConfig: _router,
+            routerConfig: _router!,
           );
         },
       ),
