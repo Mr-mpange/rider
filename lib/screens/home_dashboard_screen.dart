@@ -61,7 +61,7 @@ class HomeDashboardScreen extends StatelessWidget {
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 8, AppSpacing.marginMobile, 118),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 8, AppSpacing.marginMobile, 112),
                 children: [
                   Text(
                     'Good morning, ${profile?.displayName.isNotEmpty == true ? profile!.displayName.split(' ').first : 'Rider'}',

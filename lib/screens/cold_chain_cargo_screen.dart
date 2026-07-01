@@ -25,7 +25,7 @@ class _ColdChainCargoScreenState extends State<ColdChainCargoScreen> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 24),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 112),
           children: [
             RiiderHeader(onMenu: () => context.pop(), trailing: _HeaderPill(id: 'CC-4902-X')),
             const SizedBox(height: 14),

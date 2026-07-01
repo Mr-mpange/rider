@@ -151,7 +151,7 @@ class _FreightScreenState extends State<FreightScreen> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 24),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 112),
           children: [
             RiiderHeader(onMenu: () => context.pop()),
             const SizedBox(height: 12),

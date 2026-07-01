@@ -11,7 +11,6 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
 import '../widgets/app_bottom_nav_bar.dart';
-import '../widgets/shimmer_loading.dart';
 import '../widgets/stand_card.dart';
 
 class HomeMapScreen extends StatefulWidget {
@@ -202,13 +201,13 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
             ),
           ),
           DraggableScrollableSheet(
-            initialChildSize: 0.5,
-            minChildSize: 0.2,
-            maxChildSize: 0.85,
+            initialChildSize: 0.22,
+            minChildSize: 0.18,
+            maxChildSize: 0.72,
             builder: (context, scrollController) {
               return Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.surfaceContainerLowest.withValues(alpha: 0.98),
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                   boxShadow: [
                     BoxShadow(
@@ -249,12 +248,23 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Padding(
                               padding: EdgeInsets.all(AppSpacing.marginMobile),
-                              child: ShimmerLoading(),
+                              child: _CompactSheetState(
+                                icon: Icons.travel_explore_outlined,
+                                title: 'Nearby stops',
+                                body: 'Loading live stop data from Firestore.',
+                              ),
                             );
                           }
                           final stops = snapshot.data ?? const <BusStop>[];
                           if (stops.isEmpty) {
-                            return const Center(child: Text('Hakuna stendi za karibu'));
+                            return const Padding(
+                              padding: EdgeInsets.all(AppSpacing.marginMobile),
+                              child: _CompactSheetState(
+                                icon: Icons.location_off_outlined,
+                                title: 'No nearby stops yet',
+                                body: 'Add bus stop records in Firestore to show them here.',
+                              ),
+                            );
                           }
                           return ListView.separated(
                             controller: scrollController,
@@ -262,7 +272,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                               AppSpacing.marginMobile,
                               0,
                               AppSpacing.marginMobile,
-                              100,
+                              24,
                             ),
                             itemCount: stops.length,
                             separatorBuilder: (_, _) => const SizedBox(height: 12),
@@ -315,6 +325,55 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CompactSheetState extends StatelessWidget {
+  const _CompactSheetState({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.primaryFixed.withValues(alpha: 0.22),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: AppColors.primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppTypography.labelMd),
+                const SizedBox(height: 4),
+                Text(body, style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
