@@ -9,6 +9,7 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
 import '../core/utils/navigation_utils.dart';
+import '../core/utils/transparent_image.dart';
 import 'active_trip_screen.dart';
 import '../widgets/rider_bottom_nav_bar.dart';
 
@@ -24,6 +25,7 @@ class _RideHailingScreenState extends State<RideHailingScreen> {
   final TextEditingController _pickupController = TextEditingController(text: 'Grand Central Terminal');
   final TextEditingController _destinationController = TextEditingController(text: 'Market St.');
   int _selectedCategory = 2;
+  bool _mapOffline = false;
 
   static const _pickup = LatLng(-6.7924, 39.2083);
   static const _destination = LatLng(-6.7768, 39.2431);
@@ -74,10 +76,16 @@ class _RideHailingScreenState extends State<RideHailingScreen> {
                   flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom,
                 ),
               ),
-              children: [
+                children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.usafir.rider',
+                  errorImage: MemoryImage(transparentPngBytes()),
+                  errorTileCallback: (tile, error, stackTrace) {
+                    if (!_mapOffline && mounted) {
+                      setState(() => _mapOffline = true);
+                    }
+                  },
                 ),
                 PolylineLayer(
                   polylines: [
@@ -128,6 +136,16 @@ class _RideHailingScreenState extends State<RideHailingScreen> {
               sublabel: '2.1 km away',
             ),
           ),
+          if (_mapOffline)
+            Positioned(
+              left: 16,
+              right: 16,
+              top: MediaQuery.of(context).padding.top + 148,
+              child: _OfflineBanner(
+                title: 'Map offline',
+                body: 'Route view stays usable while tiles reconnect.',
+              ),
+            ),
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -554,6 +572,45 @@ class _EtaBadge extends StatelessWidget {
             style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _OfflineBanner extends StatelessWidget {
+  const _OfflineBanner({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.82),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.45)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.wifi_off_rounded, color: AppColors.secondary, size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(title, style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 2),
+                  Text(body, style: AppTypography.caption),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

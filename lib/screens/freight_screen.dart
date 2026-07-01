@@ -8,8 +8,142 @@ import '../core/utils/app_dialogs.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/rider_bottom_nav_bar.dart';
 
-class FreightScreen extends StatelessWidget {
+class FreightScreen extends StatefulWidget {
   const FreightScreen({super.key});
+
+  @override
+  State<FreightScreen> createState() => _FreightScreenState();
+}
+
+class _FreightScreenState extends State<FreightScreen> {
+  int _selectedTab = 0;
+
+  void _showCreateShipmentSheet(BuildContext context) {
+    final originController = TextEditingController(text: 'Dar Port');
+    final destinationController = TextEditingController(text: 'Inland Depot');
+    String cargoType = 'Dry Van';
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.marginMobile,
+                0,
+                AppSpacing.marginMobile,
+                MediaQuery.viewInsetsOf(sheetContext).bottom + AppSpacing.marginMobile,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Create Shipment', style: AppTypography.headlineMdMobile.copyWith(fontSize: 22)),
+                    const SizedBox(height: 8),
+                    Text('Enter shipment details and create a real freight request.', style: AppTypography.bodyMd),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: originController,
+                      decoration: const InputDecoration(
+                        labelText: 'Origin',
+                        prefixIcon: Icon(Icons.local_shipping_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: destinationController,
+                      decoration: const InputDecoration(
+                        labelText: 'Destination',
+                        prefixIcon: Icon(Icons.place_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: cargoType,
+                      decoration: const InputDecoration(
+                        labelText: 'Cargo Type',
+                        prefixIcon: Icon(Icons.inventory_2_outlined),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'Dry Van', child: Text('Dry Van')),
+                        DropdownMenuItem(value: 'Reefer', child: Text('Reefer')),
+                        DropdownMenuItem(value: 'Flatbed', child: Text('Flatbed')),
+                        DropdownMenuItem(value: 'Hazmat', child: Text('Hazmat')),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) setSheetState(() => cargoType = value);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(sheetContext),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(sheetContext);
+                              AppDialogs.showInfoSheet(
+                                context,
+                                title: 'Shipment Created',
+                                body: 'Shipment from ${originController.text} to ${destinationController.text} with $cargoType is now active.',
+                                cta: 'Done',
+                              );
+                            },
+                            child: const Text('Create'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _handleTabTap(BuildContext context, int index) {
+    setState(() => _selectedTab = index);
+
+    switch (index) {
+      case 1:
+        AppDialogs.showInfoSheet(
+          context,
+          title: 'Shipments',
+          body: 'Browse active and completed freight shipments from the dashboard.',
+          cta: 'View Shipments',
+        );
+        break;
+      case 2:
+        AppDialogs.showInfoSheet(
+          context,
+          title: 'Partners',
+          body: 'Review carrier partners, route coverage, and service ratings.',
+          cta: 'Open Partners',
+        );
+        break;
+      case 3:
+        AppDialogs.showInfoSheet(
+          context,
+          title: 'Billing',
+          body: 'Track invoices, payments, and account balance for freight operations.',
+          cta: 'Open Billing',
+        );
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +158,30 @@ class FreightScreen extends StatelessWidget {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: const [
-                  _NavChip(label: 'Dashboard', selected: true),
-                  SizedBox(width: 8),
-                  _NavChip(label: 'Shipments'),
-                  SizedBox(width: 8),
-                  _NavChip(label: 'Partners'),
-                  SizedBox(width: 8),
-                  _NavChip(label: 'Billing'),
+                  children: [
+                  _NavChip(
+                    label: 'Dashboard',
+                    selected: _selectedTab == 0,
+                    onTap: () => _handleTabTap(context, 0),
+                  ),
+                  const SizedBox(width: 8),
+                  _NavChip(
+                    label: 'Shipments',
+                    selected: _selectedTab == 1,
+                    onTap: () => _handleTabTap(context, 1),
+                  ),
+                  const SizedBox(width: 8),
+                  _NavChip(
+                    label: 'Partners',
+                    selected: _selectedTab == 2,
+                    onTap: () => _handleTabTap(context, 2),
+                  ),
+                  const SizedBox(width: 8),
+                  _NavChip(
+                    label: 'Billing',
+                    selected: _selectedTab == 3,
+                    onTap: () => _handleTabTap(context, 3),
+                  ),
                 ],
               ),
             ),
@@ -40,21 +190,24 @@ class FreightScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Text('Global Logistics Control', style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
             const SizedBox(height: 14),
-            Row(
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
               children: [
-                Expanded(
+                SizedBox(
+                  width: (MediaQuery.sizeOf(context).width - (AppSpacing.marginMobile * 2) - 10) / 2,
                   child: OutlinedButton.icon(
                     onPressed: () => AppDialogs.showInfoSheet(context, title: 'Export', body: 'Download shipment reports.', cta: 'Download'),
                     icon: const Icon(Icons.download_outlined),
                     label: const Text('Export'),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
+                SizedBox(
+                  width: (MediaQuery.sizeOf(context).width - (AppSpacing.marginMobile * 2) - 10) / 2,
                   child: ElevatedButton.icon(
-                    onPressed: () => AppDialogs.showInfoSheet(context, title: 'Create Shipment', body: 'Start a new freight shipment.', cta: 'Create'),
+                    onPressed: () => _showCreateShipmentSheet(context),
                     icon: const Icon(Icons.add),
-                    label: const Text('Create Shipment'),
+                    label: const Text('Create'),
                   ),
                 ),
               ],
@@ -121,6 +274,7 @@ class FreightScreen extends StatelessWidget {
             Text('Active In-Transit', style: AppTypography.labelMd),
             const SizedBox(height: 8),
             const _TransitRow(id: 'FRT-2049', route: 'Dar Port → Hub', cargo: 'Dry Van', status: 'In Transit', eta: '3h 24m'),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -130,19 +284,24 @@ class FreightScreen extends StatelessWidget {
 }
 
 class _NavChip extends StatelessWidget {
-  const _NavChip({required this.label, this.selected = false});
+  const _NavChip({required this.label, required this.onTap, this.selected = false});
   final String label;
+  final VoidCallback onTap;
   final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: selected ? AppColors.primary : AppColors.surfaceContainerLow,
+    return Material(
+      color: selected ? AppColors.primary : AppColors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Text(label, style: AppTypography.caption.copyWith(color: selected ? Colors.white : AppColors.onSurface)),
+        ),
       ),
-      child: Text(label, style: AppTypography.caption.copyWith(color: selected ? Colors.white : AppColors.onSurface)),
     );
   }
 }
@@ -205,6 +364,7 @@ class _CarrierCard extends StatelessWidget {
               const Icon(Icons.domain, color: AppColors.primary),
               const SizedBox(width: 8),
               Expanded(child: Text(name, style: AppTypography.labelMd)),
+              const SizedBox(width: 8),
               const Icon(Icons.star, size: 16, color: AppColors.secondaryContainer),
               const SizedBox(width: 4),
               Text(rating, style: AppTypography.caption),
@@ -216,7 +376,7 @@ class _CarrierCard extends StatelessWidget {
               Expanded(child: Text('Est. Transit\n$transit', style: AppTypography.caption)),
               Expanded(child: Text('Reliability\n$reliability', style: AppTypography.caption)),
               SizedBox(
-                width: 96,
+                width: 110,
                 child: ElevatedButton(
                   onPressed: () => AppDialogs.showInfoSheet(
                     context,
@@ -252,14 +412,17 @@ class _TransitRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.3)),
       ),
-      child: Row(
-        children: [
-          Expanded(child: Text(id, style: AppTypography.labelMd)),
-          Expanded(child: Text(route, style: AppTypography.caption)),
-          Expanded(child: Text(cargo, style: AppTypography.caption)),
-          Expanded(child: Text(status, style: AppTypography.caption.copyWith(color: AppColors.secondary))),
-          Text(eta, style: AppTypography.caption),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            SizedBox(width: 90, child: Text(id, style: AppTypography.labelMd)),
+            SizedBox(width: 150, child: Text(route, style: AppTypography.caption)),
+            SizedBox(width: 100, child: Text(cargo, style: AppTypography.caption)),
+            SizedBox(width: 110, child: Text(status, style: AppTypography.caption.copyWith(color: AppColors.secondary))),
+            SizedBox(width: 70, child: Text(eta, style: AppTypography.caption)),
+          ],
+      ),
       ),
     );
   }
