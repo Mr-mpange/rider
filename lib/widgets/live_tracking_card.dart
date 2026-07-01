@@ -17,6 +17,11 @@ class LiveTrackingCard extends StatelessWidget {
     this.secondaryActionLabel,
     this.onPrimaryAction,
     this.onSecondaryAction,
+    this.onTap,
+    this.isExpanded = false,
+    this.targets = const [],
+    this.activeTarget,
+    this.onTargetSelected,
   });
 
   final String title;
@@ -29,11 +34,17 @@ class LiveTrackingCard extends StatelessWidget {
   final String? secondaryActionLabel;
   final VoidCallback? onPrimaryAction;
   final VoidCallback? onSecondaryAction;
+  final VoidCallback? onTap;
+  final bool isExpanded;
+  final List<String> targets;
+  final String? activeTarget;
+  final ValueChanged<String>? onTargetSelected;
 
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
+    final card = GlassCard(
       padding: const EdgeInsets.all(16),
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -92,6 +103,74 @@ class LiveTrackingCard extends StatelessWidget {
               Expanded(child: _Metric(label: 'Status', value: 'Live')),
             ],
           ),
+          if (targets.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: targets.map((target) {
+                final selected = target == activeTarget;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  child: InkWell(
+                    onTap: onTargetSelected == null ? null : () => onTargetSelected!(target),
+                    borderRadius: BorderRadius.circular(999),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: selected ? AppColors.primary : AppColors.surface,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: selected ? AppColors.primary : AppColors.outlineVariant.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Text(
+                            target,
+                            style: AppTypography.caption.copyWith(
+                              color: selected ? Colors.white : AppColors.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: isExpanded
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tracking focus',
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          activeTarget == null
+                              ? 'Tap a target above to narrow tracking.'
+                              : 'Following $activeTarget in real time with route updates.',
+                          style: AppTypography.bodyMd.copyWith(fontSize: 14, color: AppColors.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
           if (primaryActionLabel != null || secondaryActionLabel != null) ...[
             const SizedBox(height: 14),
             Row(
@@ -116,6 +195,16 @@ class LiveTrackingCard extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+
+    if (onTap == null) return card;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: card,
       ),
     );
   }
