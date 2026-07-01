@@ -9,6 +9,9 @@ class UserProfile {
     this.balanceTzs = 0,
     this.isVerified = false,
     this.isAdmin = false,
+    this.notificationsEnabled = true,
+    this.themeMode = 'system',
+    this.localeCode = 'en',
   });
 
   final String uid;
@@ -20,6 +23,13 @@ class UserProfile {
   final double balanceTzs;
   final bool isVerified;
   final bool isAdmin;
+  final bool? notificationsEnabled;
+  final String? themeMode;
+  final String? localeCode;
+
+  bool get notificationsEnabledValue => notificationsEnabled ?? true;
+  String get themeModeValue => themeMode ?? 'system';
+  String get localeCodeValue => localeCode ?? 'en';
 
   factory UserProfile.fromFirestore(String uid, Map<String, dynamic> data) {
     return UserProfile(
@@ -32,6 +42,9 @@ class UserProfile {
       balanceTzs: (data['balanceTzs'] as num?)?.toDouble() ?? 0,
       isVerified: data['isVerified'] as bool? ?? false,
       isAdmin: data['isAdmin'] as bool? ?? false,
+      notificationsEnabled: data['notificationsEnabled'] as bool? ?? true,
+      themeMode: data['themeMode'] as String? ?? 'system',
+      localeCode: data['localeCode'] as String? ?? 'en',
     );
   }
 
@@ -44,5 +57,8 @@ class UserProfile {
         'balanceTzs': balanceTzs,
         'isVerified': isVerified,
         'isAdmin': isAdmin,
+        'notificationsEnabled': notificationsEnabled ?? true,
+        'themeMode': themeMode ?? 'system',
+        'localeCode': localeCode ?? 'en',
       };
 }

@@ -7,6 +7,7 @@ import '../core/constants/image_urls.dart';
 import '../core/router/app_router.dart';
 import '../core/services/auth_service.dart';
 import '../core/services/firestore_service.dart';
+import '../core/models/user_profile.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
@@ -18,6 +19,9 @@ class HomeDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthService>();
+    final profile = auth.currentUser;
+    final uid = auth.currentUid;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -26,26 +30,32 @@ class HomeDashboardScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 8),
               child: RiiderHeader(
-                onMenu: () => context.push(AppRoutes.admin),
                 trailing: ClipOval(
-                  child: CachedNetworkImage(
-                    imageUrl: ImageUrls.headerAvatar,
-                    width: 28,
-                    height: 28,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      width: 28,
-                      height: 28,
-                      color: AppColors.surfaceContainerLow,
-                      child: const Icon(Icons.person, size: 16, color: AppColors.primary),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      width: 28,
-                      height: 28,
-                      color: AppColors.surfaceContainerLow,
-                      child: const Icon(Icons.person, size: 16, color: AppColors.primary),
-                    ),
-                  ),
+                  child: profile?.photoUrl?.isNotEmpty == true
+                      ? CachedNetworkImage(
+                          imageUrl: profile!.photoUrl!,
+                          width: 28,
+                          height: 28,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            width: 28,
+                            height: 28,
+                            color: AppColors.surfaceContainerLow,
+                            child: const Icon(Icons.person, size: 16, color: AppColors.primary),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            width: 28,
+                            height: 28,
+                            color: AppColors.surfaceContainerLow,
+                            child: const Icon(Icons.person, size: 16, color: AppColors.primary),
+                          ),
+                        )
+                      : Container(
+                          width: 28,
+                          height: 28,
+                          color: AppColors.surfaceContainerLow,
+                          child: const Icon(Icons.person, size: 16, color: AppColors.primary),
+                        ),
                 ),
               ),
             ),
@@ -54,7 +64,7 @@ class HomeDashboardScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 8, AppSpacing.marginMobile, 118),
                 children: [
                   Text(
-                    'Good morning, Alex',
+                    'Good morning, ${profile?.displayName.isNotEmpty == true ? profile!.displayName.split(' ').first : 'Rider'}',
                     style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant, letterSpacing: 1.2),
                   ),
                   const SizedBox(height: 8),
@@ -90,7 +100,7 @@ class HomeDashboardScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   StreamBuilder<List<Map<String, dynamic>>>(
                     stream: context.read<FirestoreService>().watchActiveTrips(
-                          userId: context.read<AuthService>().currentUser?.uid,
+                          userId: uid,
                         ),
                     builder: (context, snapshot) {
                       final trips = snapshot.data ?? const [];
@@ -166,7 +176,28 @@ class HomeDashboardScreen extends StatelessWidget {
                               children: [
                                 Text('RIIDER Wallet', style: AppTypography.caption.copyWith(color: Colors.white70)),
                                 const SizedBox(height: 4),
-                                Text('TSh 4,280.50', style: AppTypography.headlineMdMobile.copyWith(color: Colors.white)),
+                                StreamBuilder<UserProfile?>(
+                                  stream: auth.watchUserProfile(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return Text(
+                                        'Loading balance...',
+                                        style: AppTypography.headlineMdMobile.copyWith(color: Colors.white),
+                                      );
+                                    }
+                                    final balance = snapshot.data?.balanceTzs ?? profile?.balanceTzs;
+                                    if (balance == null) {
+                                      return Text(
+                                        'No wallet data yet',
+                                        style: AppTypography.headlineMdMobile.copyWith(color: Colors.white),
+                                      );
+                                    }
+                                    return Text(
+                                      'TSh ${balance.toStringAsFixed(2)}',
+                                      style: AppTypography.headlineMdMobile.copyWith(color: Colors.white),
+                                    );
+                                  },
+                                ),
                               ],
                             ),
                           ),

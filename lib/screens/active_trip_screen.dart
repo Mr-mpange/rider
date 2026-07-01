@@ -41,7 +41,7 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = context.watch<AuthService>().currentUser?.uid;
+    final userId = context.watch<AuthService>().currentUid;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -174,9 +174,9 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return const _TripStateBanner(
-                      icon: Icons.error_outline,
-                      title: 'Trip status unavailable',
-                      body: 'Firestore could not load the active trip right now.',
+                      icon: Icons.trip_origin,
+                      title: 'No active trip',
+                      body: 'Start a trip from Home to see live tracking here.',
                     );
                   }
                   if (snapshot.connectionState == ConnectionState.waiting) {

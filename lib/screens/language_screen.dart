@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../core/services/auth_service.dart';
 import '../core/services/app_preferences.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
@@ -13,6 +14,7 @@ class LanguageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final prefs = context.watch<AppPreferences>();
+    final auth = context.read<AuthService>();
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -30,13 +32,19 @@ class LanguageScreen extends StatelessWidget {
           _LanguageTile(
             title: 'English',
             selected: prefs.localeCode == 'en',
-            onTap: () => prefs.setLocaleCode('en'),
+            onTap: () async {
+              await prefs.setLocaleCode('en');
+              await auth.updateSettings(localeCode: 'en');
+            },
           ),
           const SizedBox(height: 12),
           _LanguageTile(
             title: 'Swahili',
             selected: prefs.localeCode == 'sw',
-            onTap: () => prefs.setLocaleCode('sw'),
+            onTap: () async {
+              await prefs.setLocaleCode('sw');
+              await auth.updateSettings(localeCode: 'sw');
+            },
           ),
         ],
       ),

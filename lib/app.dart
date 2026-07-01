@@ -46,12 +46,13 @@ class _RiderAppState extends State<RiderApp> {
           final prefs = context.watch<AppPreferences>();
           final auth = context.watch<AuthService>();
           _router ??= createRouter(prefs: prefs, auth: auth);
-          final localeCode = prefs.localeCode;
           return MaterialApp.router(
             title: AppBranding.appTitle,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light,
-            locale: Locale(localeCode),
+            darkTheme: AppTheme.dark,
+            themeMode: ThemeMode.system,
+            locale: Locale(prefs.localeCode),
             supportedLocales: const [Locale('en'), Locale('sw')],
             routerConfig: _router!,
           );

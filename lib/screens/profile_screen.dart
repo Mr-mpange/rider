@@ -4,14 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../core/constants/app_branding.dart';
-import '../core/constants/image_urls.dart';
 import '../core/router/app_router.dart';
 import '../core/services/auth_service.dart';
 import '../core/models/user_profile.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
-import '../core/utils/app_dialogs.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/rider_bottom_nav_bar.dart';
 import '../widgets/settings_tile.dart';
@@ -32,38 +30,82 @@ class ProfileScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 118),
           children: [
-            RiiderHeader(onMenu: () => context.push(AppRoutes.admin)),
+            const RiiderHeader(),
             const SizedBox(height: 12),
             GlassCard(
               padding: const EdgeInsets.all(24),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipOval(
-                    child: CachedNetworkImage(
-                      imageUrl: ImageUrls.profileAvatar,
-                      width: 68,
-                      height: 68,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        width: 68,
-                        height: 68,
-                        color: AppColors.surfaceContainerLow,
-                        child: const Icon(Icons.person, size: 32, color: AppColors.primary),
+                  Stack(
+                    children: [
+                      ClipOval(
+                        child: GestureDetector(
+                          onTap: () => _editProfile(context, profile, auth),
+                          child: profile?.photoUrl?.isNotEmpty == true
+                              ? CachedNetworkImage(
+                                  imageUrl: profile!.photoUrl!,
+                                  width: 72,
+                                  height: 72,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(
+                                    width: 72,
+                                    height: 72,
+                                    color: AppColors.surfaceContainerLow,
+                                    child: const Icon(Icons.person, size: 32, color: AppColors.primary),
+                                  ),
+                                  errorWidget: (context, url, error) => Container(
+                                    width: 72,
+                                    height: 72,
+                                    color: AppColors.surfaceContainerLow,
+                                    child: const Icon(Icons.person, size: 32, color: AppColors.primary),
+                                  ),
+                                )
+                              : Container(
+                                  width: 72,
+                                  height: 72,
+                                  color: AppColors.surfaceContainerLow,
+                                  child: const Icon(Icons.person, size: 32, color: AppColors.primary),
+                                ),
+                        ),
                       ),
-                      errorWidget: (context, url, error) => Container(
-                        width: 68,
-                        height: 68,
-                        color: AppColors.surfaceContainerLow,
-                        child: const Icon(Icons.person, size: 32, color: AppColors.primary),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: GestureDetector(
+                          onTap: () => _editProfile(context, profile, auth),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: const Icon(Icons.edit, size: 14, color: Colors.white),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(profile?.displayName ?? 'Rider User', style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                profile?.displayName ?? 'Rider User',
+                                style: AppTypography.headlineMdMobile.copyWith(fontSize: 18),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () => _editProfile(context, profile, auth),
+                              icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
+                            ),
+                          ],
+                        ),
                         Text(
                           profile?.email.isNotEmpty == true ? profile!.email : 'Enterprise Logistics Admin',
                           style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
@@ -92,49 +134,31 @@ class ProfileScreen extends StatelessWidget {
             SettingsTile(
               icon: Icons.person_outline,
               title: 'Personal Info',
-              subtitle: 'Contact details and identity',
-              onTap: () => context.push(AppRoutes.securityPrivacy),
-            ),
-            SettingsTile(
-              icon: Icons.description_outlined,
-              title: 'Documents',
-              subtitle: 'Licenses, Insurance, Permits',
-              badge: '1 Expiring',
-              onTap: () => AppDialogs.showInfoSheet(
-                context,
-                title: 'Documents',
-                body: 'Review licenses, insurance, and permit documents.',
-                cta: 'Open Documents',
-              ),
+              subtitle: 'Edit name, photo, and contact details',
+              onTap: () => _editProfile(context, profile, auth),
             ),
             const SectionHeader('App Preferences'),
             SettingsTile(
               icon: Icons.language,
               title: 'Language',
-              subtitle: 'English (US)',
+              subtitle: profile?.localeCodeValue == 'sw' ? 'Swahili' : 'English (US)',
               onTap: () => context.push(AppRoutes.language),
             ),
             SettingsTile(
               icon: Icons.dark_mode_outlined,
               title: 'Theme',
-              subtitle: 'Switch between Light and Dark mode',
-              onTap: () => AppDialogs.showInfoSheet(
-                context,
-                title: 'Theme',
-                body: 'RIIDER currently follows the approved light enterprise theme.',
-                cta: 'Close',
-              ),
+              subtitle: profile?.themeModeValue == 'dark'
+                  ? 'Dark'
+                  : profile?.themeModeValue == 'light'
+                      ? 'Light'
+                      : 'System',
+              onTap: () => _editSettings(context, auth, profile),
             ),
             SettingsTile(
               icon: Icons.notifications_outlined,
               title: 'Notifications',
-              subtitle: 'Alerts, updates, and messages',
-              onTap: () => AppDialogs.showInfoSheet(
-                context,
-                title: 'Notifications',
-                body: 'Manage trip, wallet, and logistics notification preferences.',
-                cta: 'Open Settings',
-              ),
+              subtitle: profile?.notificationsEnabledValue == true ? 'Enabled' : 'Disabled',
+              onTap: () => _editSettings(context, auth, profile),
             ),
             const SectionHeader('Privacy & Security'),
             SettingsTile(
@@ -195,6 +219,12 @@ class ProfileScreen extends StatelessWidget {
               subtitle: profile?.phoneNumber.isNotEmpty == true ? profile!.phoneNumber : 'Add email for payouts',
               onTap: () => context.push(AppRoutes.paymentMethods),
             ),
+            SettingsTile(
+              icon: Icons.security_update_outlined,
+              title: 'Security & Privacy',
+              subtitle: 'Password, privacy, and account rules',
+              onTap: () => context.push(AppRoutes.securityPrivacy),
+            ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -215,6 +245,85 @@ class ProfileScreen extends StatelessWidget {
       bottomNavigationBar: const RiderBottomNavBar(currentTab: RiderNavTab.profile),
     );
   }
+}
+
+Future<void> _editProfile(BuildContext context, UserProfile? profile, AuthService auth) async {
+  if (profile == null) return;
+  final nameController = TextEditingController(text: profile.displayName);
+  final photoController = TextEditingController(text: profile.photoUrl ?? '');
+  await showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Edit Profile'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Display name')),
+          TextField(controller: photoController, decoration: const InputDecoration(labelText: 'Photo URL')),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+        TextButton(
+          onPressed: () async {
+            await auth.updateIdentity(
+              displayName: nameController.text.trim(),
+              photoUrl: photoController.text.trim().isEmpty ? null : photoController.text.trim(),
+            );
+            if (dialogContext.mounted) Navigator.pop(dialogContext);
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
+}
+
+Future<void> _editSettings(BuildContext context, AuthService auth, UserProfile? profile) async {
+  if (profile == null) return;
+  var notificationsEnabled = profile.notificationsEnabledValue;
+  var themeMode = profile.themeModeValue;
+  await showDialog<void>(
+    context: context,
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: const Text('Settings'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SwitchListTile(
+              value: notificationsEnabled,
+              onChanged: (value) => setState(() => notificationsEnabled = value),
+              title: const Text('Notifications'),
+            ),
+            DropdownButtonFormField<String>(
+              initialValue: themeMode,
+              items: const [
+                DropdownMenuItem(value: 'system', child: Text('System')),
+                DropdownMenuItem(value: 'light', child: Text('Light')),
+                DropdownMenuItem(value: 'dark', child: Text('Dark')),
+              ],
+              onChanged: (value) => setState(() => themeMode = value ?? 'system'),
+              decoration: const InputDecoration(labelText: 'Theme'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              await auth.updateSettings(
+                notificationsEnabled: notificationsEnabled,
+                themeMode: themeMode,
+              );
+              if (dialogContext.mounted) Navigator.pop(dialogContext);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _Badge extends StatelessWidget {

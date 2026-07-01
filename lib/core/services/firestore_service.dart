@@ -162,19 +162,39 @@ class FirestoreService {
   }
 
   Stream<List<Map<String, dynamic>>> watchWalletTransactions({String? userId, int limit = 20}) {
-    Query<Map<String, dynamic>> query = _walletTransactions.orderBy('createdAt', descending: true).limit(limit);
+    Query<Map<String, dynamic>> query = _walletTransactions;
     if (userId != null) {
       query = query.where('userId', isEqualTo: userId);
     }
-    return query.snapshots().map((snap) => snap.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList());
+    return query.snapshots().map((snap) {
+      final docs = snap.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
+      docs.sort((a, b) {
+        final aTime = a['createdAt'];
+        final bTime = b['createdAt'];
+        final aDate = aTime is Timestamp ? aTime.toDate() : DateTime.fromMillisecondsSinceEpoch(0);
+        final bDate = bTime is Timestamp ? bTime.toDate() : DateTime.fromMillisecondsSinceEpoch(0);
+        return bDate.compareTo(aDate);
+      });
+      return docs.take(limit).toList();
+    });
   }
 
   Stream<List<Map<String, dynamic>>> watchTripHistory({String? userId, int limit = 20}) {
-    Query<Map<String, dynamic>> query = _activeTrips.orderBy('updatedAt', descending: true).limit(limit);
+    Query<Map<String, dynamic>> query = _activeTrips;
     if (userId != null) {
       query = query.where('userId', isEqualTo: userId);
     }
-    return query.snapshots().map((snap) => snap.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList());
+    return query.snapshots().map((snap) {
+      final docs = snap.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
+      docs.sort((a, b) {
+        final aTime = a['updatedAt'] ?? a['endedAt'];
+        final bTime = b['updatedAt'] ?? b['endedAt'];
+        final aDate = aTime is Timestamp ? aTime.toDate() : DateTime.fromMillisecondsSinceEpoch(0);
+        final bDate = bTime is Timestamp ? bTime.toDate() : DateTime.fromMillisecondsSinceEpoch(0);
+        return bDate.compareTo(aDate);
+      });
+      return docs.take(limit).toList();
+    });
   }
 
   Future<UserProfile?> getUserProfile(String uid) async {

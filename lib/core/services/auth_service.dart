@@ -32,6 +32,9 @@ class AuthService extends ChangeNotifier {
             isVerified: user.emailVerified,
             tripCount: 0,
             balanceTzs: 0,
+            notificationsEnabled: true,
+            themeMode: 'system',
+            localeCode: 'en',
           );
       notifyListeners();
     });
@@ -55,7 +58,8 @@ class AuthService extends ChangeNotifier {
     return _firestoreService!;
   }
 
-  dynamic get currentUser => _profile;
+  UserProfile? get currentUser => _profile;
+  String? get currentUid => _firebaseAuth.currentUser?.uid;
   bool get isAuthenticated => _firebaseAuth.currentUser != null;
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
@@ -93,6 +97,9 @@ class AuthService extends ChangeNotifier {
         isVerified: false,
         tripCount: 0,
         balanceTzs: 0,
+        notificationsEnabled: true,
+        themeMode: 'system',
+        localeCode: 'en',
       );
       await _firestore.upsertUserProfile(profile);
       _profile = profile;
@@ -130,6 +137,55 @@ class AuthService extends ChangeNotifier {
     final user = _firebaseAuth.currentUser;
     if (user == null || _profile == null) return;
 
+      final updated = UserProfile(
+      uid: _profile!.uid,
+      displayName: displayName ?? _profile!.displayName,
+      email: _profile!.email,
+      phoneNumber: _profile!.phoneNumber,
+      photoUrl: photoUrl ?? _profile!.photoUrl,
+      tripCount: _profile!.tripCount,
+      balanceTzs: _profile!.balanceTzs,
+      isVerified: _profile!.isVerified,
+      isAdmin: _profile!.isAdmin,
+      notificationsEnabled: _profile!.notificationsEnabledValue,
+      themeMode: _profile!.themeModeValue,
+      localeCode: _profile!.localeCodeValue,
+    );
+    await _firestore.upsertUserProfile(updated);
+    _profile = updated;
+    notifyListeners();
+  }
+
+  Future<void> updateSettings({
+    bool? notificationsEnabled,
+    String? themeMode,
+    String? localeCode,
+  }) async {
+    if (_profile == null) return;
+    final updated = UserProfile(
+      uid: _profile!.uid,
+      displayName: _profile!.displayName,
+      email: _profile!.email,
+      phoneNumber: _profile!.phoneNumber,
+      photoUrl: _profile!.photoUrl,
+      tripCount: _profile!.tripCount,
+      balanceTzs: _profile!.balanceTzs,
+      isVerified: _profile!.isVerified,
+      isAdmin: _profile!.isAdmin,
+      notificationsEnabled: notificationsEnabled ?? _profile!.notificationsEnabledValue,
+      themeMode: themeMode ?? _profile!.themeModeValue,
+      localeCode: localeCode ?? _profile!.localeCodeValue,
+    );
+    await _firestore.upsertUserProfile(updated);
+    _profile = updated;
+    notifyListeners();
+  }
+
+  Future<void> updateIdentity({
+    String? displayName,
+    String? photoUrl,
+  }) async {
+    if (_profile == null) return;
     final updated = UserProfile(
       uid: _profile!.uid,
       displayName: displayName ?? _profile!.displayName,
@@ -140,6 +196,9 @@ class AuthService extends ChangeNotifier {
       balanceTzs: _profile!.balanceTzs,
       isVerified: _profile!.isVerified,
       isAdmin: _profile!.isAdmin,
+      notificationsEnabled: _profile!.notificationsEnabledValue,
+      themeMode: _profile!.themeModeValue,
+      localeCode: _profile!.localeCodeValue,
     );
     await _firestore.upsertUserProfile(updated);
     _profile = updated;

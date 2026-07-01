@@ -306,14 +306,6 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.admin_panel_settings),
-              title: const Text('Admin Dashboard'),
-              onTap: () {
-                Navigator.pop(ctx);
-                context.push(AppRoutes.admin);
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.bookmark),
               title: const Text('Sehemu Zilizohifadhiwa'),
               onTap: () {

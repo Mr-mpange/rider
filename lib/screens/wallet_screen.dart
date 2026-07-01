@@ -64,6 +64,7 @@ class _WalletScreenState extends State<WalletScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
     final profile = auth.currentUser;
+    final uid = auth.currentUid;
     final balanceText = _showBalance ? 'TSh ${((profile?.balanceTzs ?? 0)).toStringAsFixed(2)}' : 'TSh ••••••';
 
     return Scaffold(
@@ -133,17 +134,26 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                   const SizedBox(height: 16),
                   StreamBuilder<List<Map<String, dynamic>>>(
-                    stream: context.read<FirestoreService>().watchWalletTransactions(userId: profile?.uid, limit: 12),
+                    stream: uid == null
+                        ? Stream<List<Map<String, dynamic>>>.value(const [])
+                        : context.read<FirestoreService>().watchWalletTransactions(userId: uid, limit: 12),
                     builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return _StateCard(
-                          icon: Icons.error_outline,
-                          title: 'Unable to load wallet chart',
-                          body: 'Check your connection and try again.',
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const _StateCard(
+                          icon: Icons.bar_chart_outlined,
+                          title: 'Loading wallet analysis',
+                          body: 'Fetching your recent wallet activity from Firestore.',
                         );
                       }
                       final transactions = snapshot.data ?? const [];
                       final series = _chartSeries(transactions, _chartMode);
+                      if (transactions.isEmpty) {
+                        return const _StateCard(
+                          icon: Icons.pie_chart_outline,
+                          title: 'No wallet activity yet',
+                          body: 'Wallet analysis will appear once transactions are recorded.',
+                        );
+                      }
                       return Column(
                         children: [
                           SizedBox(
@@ -202,18 +212,10 @@ class _WalletScreenState extends State<WalletScreen> {
               const SizedBox(height: 16),
             ],
             StreamBuilder<List<Map<String, dynamic>>>(
-              stream: context.read<FirestoreService>().watchWalletTransactions(userId: profile?.uid),
+              stream: uid == null
+                  ? Stream<List<Map<String, dynamic>>>.value(const [])
+                  : context.read<FirestoreService>().watchWalletTransactions(userId: uid),
               builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: _StateCard(
-                      icon: Icons.error_outline,
-                      title: 'Transactions unavailable',
-                      body: 'Firestore returned an error while loading your wallet history.',
-                    ),
-                  );
-                }
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Padding(
                     padding: EdgeInsets.all(24),
@@ -224,7 +226,9 @@ class _WalletScreenState extends State<WalletScreen> {
                 if (transactions.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.all(24),
-                    child: Center(child: Text('No wallet activity yet')),
+                    child: Center(
+                      child: Text('No wallet activity yet'),
+                    ),
                   );
                 }
                 return Column(
