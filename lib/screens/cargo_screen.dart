@@ -5,8 +5,8 @@ import '../core/router/app_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../core/utils/app_dialogs.dart';
 import '../widgets/live_tracking_card.dart';
-import '../widgets/rider_bottom_nav_bar.dart';
 
 class CargoScreen extends StatelessWidget {
   const CargoScreen({super.key});
@@ -17,28 +17,28 @@ class CargoScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 8, AppSpacing.marginMobile, 110),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 118),
           children: [
             Row(
               children: [
-                Text('Freight Shipping', style: AppTypography.headlineMdMobile),
+                Text('Port Logistics', style: AppTypography.headlineMdMobile),
                 const Spacer(),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () => AppDialogs.showSearchSheet(context),
                   icon: const Icon(Icons.search, color: AppColors.primary),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             InkWell(
               onTap: () => context.push(AppRoutes.freight),
               borderRadius: BorderRadius.circular(24),
-              child: Container(
-                padding: const EdgeInsets.all(20),
+                child: Container(
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceContainerLowest,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.35)),
+                  border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.28)),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.primary.withValues(alpha: 0.04),
@@ -73,7 +73,7 @@ class CargoScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             InkWell(
               onTap: () => context.push(AppRoutes.coldChain),
               borderRadius: BorderRadius.circular(24),
@@ -87,11 +87,11 @@ class CargoScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.35)),
+                border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.28)),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.primary.withValues(alpha: 0.04),
@@ -125,9 +125,9 @@ class CargoScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(24),
@@ -156,13 +156,13 @@ class CargoScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.35)),
+                border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.28)),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.primary.withValues(alpha: 0.04),
@@ -191,7 +191,6 @@ class CargoScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: const RiderBottomNavBar(currentTab: RiderNavTab.cargo),
     );
   }
 }

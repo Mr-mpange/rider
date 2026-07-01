@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/constants/app_branding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -67,7 +68,7 @@ class _DestinationSearchScreenState extends State<DestinationSearchScreen> {
               onPressed: () => context.pop(),
             ),
             title: Text(
-              'RIDER',
+              AppBranding.appName,
               style: AppTypography.headlineMdMobile.copyWith(color: AppColors.primary),
             ),
             actions: const [
@@ -98,7 +99,7 @@ class _DestinationSearchScreenState extends State<DestinationSearchScreen> {
                       focusNode: _focusNode,
                       style: AppTypography.textTheme.bodyLarge,
                       decoration: InputDecoration(
-                        hintText: 'Naenda wapi?',
+                        hintText: 'Where are you going?',
                         border: InputBorder.none,
                         prefixIcon: const Icon(Icons.my_location, color: AppColors.primary),
                         suffixIcon: const Icon(Icons.mic, color: AppColors.onSurfaceVariant),
@@ -112,7 +113,7 @@ class _DestinationSearchScreenState extends State<DestinationSearchScreen> {
                   ),
                   const SizedBox(height: 32),
                   Text(
-                    'Safari za Karibuni',
+                    'Recent Trips',
                     style: AppTypography.textTheme.labelLarge?.copyWith(
                       color: AppColors.onSurfaceVariant,
                       letterSpacing: 1.2,
@@ -144,7 +145,7 @@ class _DestinationSearchScreenState extends State<DestinationSearchScreen> {
                   ),
                   const SizedBox(height: 32),
                   Text(
-                    'Maeneo Maarufu',
+                    'Popular Places',
                     style: AppTypography.textTheme.labelLarge?.copyWith(
                       color: AppColors.onSurfaceVariant,
                       letterSpacing: 1.2,
@@ -162,7 +163,7 @@ class _DestinationSearchScreenState extends State<DestinationSearchScreen> {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 24),
                           child: Text(
-                            'Hakuna maeneo maarufu yaliyosajiliwa.',
+                            'No popular places available yet.',
                             style: AppTypography.textTheme.bodyMedium?.copyWith(
                               color: AppColors.onSurfaceVariant,
                             ),
@@ -189,7 +190,7 @@ class _DestinationSearchScreenState extends State<DestinationSearchScreen> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Maeneo ya karibu zaidi',
+                        'Nearby Places',
                         style: AppTypography.textTheme.labelSmall?.copyWith(
                           color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
                         ),

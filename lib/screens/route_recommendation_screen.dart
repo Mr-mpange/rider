@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../core/constants/app_branding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -36,7 +37,7 @@ class RouteRecommendationScreen extends StatelessWidget {
               onPressed: () => context.pop(),
             ),
             title: Text(
-              'RIDER',
+              AppBranding.appName,
               style: AppTypography.textTheme.displayLarge?.copyWith(
                 fontSize: 20,
                 color: AppColors.primary,

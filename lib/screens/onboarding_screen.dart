@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../core/constants/app_branding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -23,9 +24,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _page = 0;
 
   final _steps = const [
-    _Step(ImageUrls.dashboardMap, 'Book rides instantly', 'Experience the future of urban mobility with premium on-demand vehicles.'),
-    _Step(ImageUrls.mapNightLagos, 'Move freight smoothly', 'Ship cargo, manage route color checks, and monitor logistics in one place.'),
-    _Step(ImageUrls.dashboardMap, 'Track everything live', 'Stay on top of your trip, wallet, and route intelligence with live control.'),
+    _Step(ImageUrls.dashboardMap, 'Book rides instantly', 'Move across the city with premium on-demand transport.'),
+    _Step(ImageUrls.mapNightLagos, 'Share bus trips', 'Join corporate shuttles and community routes for your daily commute.'),
+    _Step(ImageUrls.dashboardMap, 'Ship cargo anywhere', 'Manage freight, cold chain, and logistics from one control tower.'),
   ];
 
   Future<void> _skip() async {
@@ -58,7 +59,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               Row(
                 children: [
-                  Text('RIDER', style: AppTypography.textTheme.labelLarge?.copyWith(color: AppColors.primary)),
+                  Text(AppBranding.appName, style: AppTypography.textTheme.labelLarge?.copyWith(color: AppColors.primary)),
                   const Spacer(),
                   TextButton(onPressed: _skip, child: const Text('Skip')),
                 ],

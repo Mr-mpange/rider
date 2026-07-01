@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'core/constants/app_branding.dart';
 import 'core/router/app_router.dart';
 import 'core/services/app_preferences.dart';
 import 'core/services/auth_service.dart';
@@ -36,7 +37,7 @@ class _RiderAppState extends State<RiderApp> {
         builder: (context) {
           final localeCode = context.watch<AppPreferences>().localeCode;
           return MaterialApp.router(
-            title: 'Rider',
+            title: AppBranding.appTitle,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light,
             locale: Locale(localeCode),

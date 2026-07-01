@@ -59,7 +59,7 @@ class _OtpScreenState extends State<OtpScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        title: Text('Thibitisha Namba', style: AppTypography.headlineMdMobile),
+        title: Text('Verify Code', style: AppTypography.headlineMdMobile),
       ),
       body: SafeArea(
         child: Padding(
@@ -68,14 +68,14 @@ class _OtpScreenState extends State<OtpScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Ingiza Kodi',
+                'Enter Code',
                 style: AppTypography.textTheme.displayLarge?.copyWith(
                   color: AppColors.primary,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Uthibitisho wa namba hauhitajiki kwenye toleo hili la offline.',
+                'Verification is not required in this offline build.',
                 style: AppTypography.textTheme.bodyMedium?.copyWith(
                   color: AppColors.onSurfaceVariant,
                 ),
@@ -129,8 +129,8 @@ class _OtpScreenState extends State<OtpScreen> {
                       : null,
                   child: Text(
                     _resendSeconds > 0
-                        ? 'Tuma tena baada ya ${_resendSeconds}s'
-                        : 'Tuma tena kodi',
+                        ? 'Resend in ${_resendSeconds}s'
+                        : 'Resend code',
                     style: AppTypography.textTheme.labelLarge?.copyWith(
                       color: _resendSeconds > 0 ? AppColors.outline : AppColors.primary,
                     ),
@@ -139,7 +139,7 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
               const Spacer(),
               AppButton(
-                label: 'Endelea',
+                label: 'Continue',
                 icon: Icons.check,
                 onPressed: _verify,
               ),

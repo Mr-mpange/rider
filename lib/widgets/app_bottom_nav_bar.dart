@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/constants/app_branding.dart';
 
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
@@ -194,7 +195,7 @@ class AppTopBar extends StatelessWidget {
             ),
           Expanded(
             child: Text(
-              'RIDER',
+              AppBranding.appName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.textTheme.displayLarge?.copyWith(

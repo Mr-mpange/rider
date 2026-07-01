@@ -7,6 +7,7 @@ import '../core/router/app_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../widgets/glass_card.dart';
 import '../widgets/rider_bottom_nav_bar.dart';
 
 class HomeDashboardScreen extends StatelessWidget {
@@ -20,144 +21,156 @@ class HomeDashboardScreen extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile, vertical: 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.menu, size: 20),
-                    onPressed: () => context.push(AppRoutes.admin),
-                  ),
-                  const SizedBox(width: 8),
-                  Text('RIDER', style: AppTypography.labelMd.copyWith(color: AppColors.primary)),
-                  const Spacer(),
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundImage: CachedNetworkImageProvider(ImageUrls.headerAvatar),
-                  ),
-                ],
+              padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 8),
+              child: RiiderHeader(
+                onMenu: () => context.push(AppRoutes.admin),
+                trailing: CircleAvatar(
+                  radius: 14,
+                  backgroundImage: CachedNetworkImageProvider(ImageUrls.headerAvatar),
+                ),
               ),
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 4, AppSpacing.marginMobile, 110),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 8, AppSpacing.marginMobile, 118),
                 children: [
-                  Text('Good morning, Asha', style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant, letterSpacing: 1.2)),
-                  const SizedBox(height: 6),
-                  Text('Where are you going today?', style: AppTypography.headlineMdMobile.copyWith(color: AppColors.onSurface)),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceContainerLowest,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.35)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(18),
-                          child: Stack(
-                            children: [
-                              AspectRatio(
-                                aspectRatio: 1.45,
-                                child: CachedNetworkImage(imageUrl: ImageUrls.dashboardMap, fit: BoxFit.cover),
-                              ),
-                              Positioned(
-                                left: 14,
-                                top: 14,
-                                child: _MiniCard(
-                                  title: 'Closest Trip',
-                                  subtitle: '3 min away',
-                                  action: 'Request',
-                                  onTap: () => context.push(AppRoutes.rideHailing),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  Text(
+                    'Good morning, Alex',
+                    style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant, letterSpacing: 1.2),
                   ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.account_balance_wallet, color: Colors.white),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('RIDER WALLET', style: AppTypography.caption.copyWith(color: Colors.white70)),
-                              const SizedBox(height: 4),
-                              Text('TSh 4,280.50', style: AppTypography.headlineMdMobile.copyWith(color: Colors.white)),
-                            ],
+                  const SizedBox(height: 8),
+                  Text(
+                    'Where are you going today?',
+                    style: AppTypography.headlineMdMobile.copyWith(color: AppColors.onSurface),
+                  ),
+                  const SizedBox(height: 16),
+                  GlassCard(
+                    padding: const EdgeInsets.all(20),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: Stack(
+                        children: [
+                          AspectRatio(
+                            aspectRatio: 1.45,
+                            child: CachedNetworkImage(imageUrl: ImageUrls.dashboardMap, fit: BoxFit.cover),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () => context.push(AppRoutes.wallet),
-                          child: const Text('Details', style: TextStyle(color: Colors.white)),
-                        ),
-                      ],
+                          Positioned(
+                            left: 16,
+                            top: 16,
+                            child: _MiniCard(
+                              title: 'Closest Ride',
+                              subtitle: '3 mins away',
+                              action: 'Request',
+                              onTap: () => context.push(AppRoutes.rideHailing),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
+                  InkWell(
+                    onTap: () => context.push(AppRoutes.wallet),
+                    borderRadius: BorderRadius.circular(24),
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: AppColors.walletGradient,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                            blurRadius: 30,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.account_balance_wallet, color: Colors.white),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('RIIDER Wallet', style: AppTypography.caption.copyWith(color: Colors.white70)),
+                                const SizedBox(height: 4),
+                                Text('TSh 4,280.50', style: AppTypography.headlineMdMobile.copyWith(color: Colors.white)),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => context.push(AppRoutes.wallet),
+                            icon: const Icon(Icons.add, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Services', style: AppTypography.labelMd),
+                      Text('Our Services', style: AppTypography.labelMd.copyWith(letterSpacing: 1.2)),
                       TextButton(onPressed: () => context.push(AppRoutes.cargo), child: const Text('See all')),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   GridView.count(
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     crossAxisCount: 3,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 0.96,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.95,
                     children: [
                       _ServiceTile(icon: Icons.directions_car, label: 'Ride', onTap: () => context.push(AppRoutes.rideHailing)),
                       _ServiceTile(icon: Icons.directions_bus, label: 'Bus Pool', onTap: () => context.push(AppRoutes.busPool)),
-                      _ServiceTile(icon: Icons.local_shipping, label: 'Freight', onTap: () => context.push(AppRoutes.cargo)),
-                      _ServiceTile(icon: Icons.ac_unit, label: 'Cold Cargo', onTap: () => context.push(AppRoutes.cargo)),
-                      _ServiceTile(icon: Icons.map_outlined, label: 'Routes', onTap: () => context.push(AppRoutes.savedPlaces)),
-                      _ServiceTile(icon: Icons.smart_toy_outlined, label: 'Copilot', onTap: () => context.push(AppRoutes.copilot)),
+                      _ServiceTile(icon: Icons.local_shipping, label: 'Freight', onTap: () => context.push(AppRoutes.freight)),
+                      _ServiceTile(icon: Icons.ac_unit, label: 'Cold Cargo', onTap: () => context.push(AppRoutes.coldChain)),
+                      _ServiceTile(icon: Icons.inventory_2_outlined, label: 'Logistics', onTap: () => context.push(AppRoutes.cargo)),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Recent Activity', style: AppTypography.labelMd),
-                      TextButton(onPressed: () => context.push(AppRoutes.savedPlaces), child: const Text('View all')),
+                      Text('Recent Activity', style: AppTypography.labelMd.copyWith(letterSpacing: 1.2)),
+                      TextButton(onPressed: () => context.push(AppRoutes.tripHistory), child: const Text('View all')),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  _ActivityCard(title: 'Freight Shipment', subtitle: 'Sent to Dar Port', status: 'In Transit', statusColor: AppColors.secondary),
+                  const SizedBox(height: 10),
+                  _ActivityCard(
+                    icon: Icons.inventory_2_outlined,
+                    title: 'Freight Shipment #8821',
+                    subtitle: 'Sent to Los Angeles Distribution',
+                    status: 'In Transit',
+                    statusColor: AppColors.secondaryContainer,
+                    meta: 'Estimated: 2h',
+                  ),
                   const SizedBox(height: 12),
-                  _ActivityCard(title: 'Ride History', subtitle: 'December 26, 2024', status: 'COMPLETED', statusColor: AppColors.primary),
+                  _ActivityCard(
+                    icon: Icons.history,
+                    title: 'Ride History',
+                    subtitle: 'Downtown Corporate Hub',
+                    status: 'Completed',
+                    statusColor: AppColors.primary,
+                    meta: 'May 14, 2024',
+                  ),
                   const SizedBox(height: 12),
-                  _ActivityCard(title: 'Cold Storage', subtitle: 'Delivered on time', status: 'ON TIME', statusColor: AppColors.tertiary),
+                  _ActivityCard(
+                    icon: Icons.ac_unit,
+                    title: 'Cold Storage #4490',
+                    subtitle: 'Pharmaceutical Delivery',
+                    status: 'Pending',
+                    statusColor: AppColors.tertiary,
+                    meta: 'Scheduled: 4 PM',
+                  ),
                 ],
               ),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push(AppRoutes.copilot),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: Colors.white),
       ),
       bottomNavigationBar: const RiderBottomNavBar(currentTab: RiderNavTab.home),
     );
@@ -170,24 +183,36 @@ class _MiniCard extends StatelessWidget {
   final String subtitle;
   final String action;
   final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 180,
-      padding: const EdgeInsets.all(12),
+      width: 200,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: AppTypography.labelMd),
-        Text(subtitle, style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant)),
-        const SizedBox(height: 8),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(onPressed: onTap, child: Text(action)),
-        ),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: AppTypography.labelMd),
+          Text(subtitle, style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant)),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(onPressed: onTap, child: Text(action)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -197,6 +222,7 @@ class _ServiceTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -206,14 +232,21 @@ class _ServiceTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.35)),
+          border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.25)),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.03),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: AppColors.primary),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(label, textAlign: TextAlign.center, style: AppTypography.caption),
           ],
         ),
@@ -223,11 +256,21 @@ class _ServiceTile extends StatelessWidget {
 }
 
 class _ActivityCard extends StatelessWidget {
-  const _ActivityCard({required this.title, required this.subtitle, required this.status, required this.statusColor});
+  const _ActivityCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.status,
+    required this.statusColor,
+    required this.meta,
+  });
+  final IconData icon;
   final String title;
   final String subtitle;
   final String status;
   final Color statusColor;
+  final String meta;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -235,21 +278,33 @@ class _ActivityCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.3)),
+        border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.22)),
       ),
       child: Row(
         children: [
-          CircleAvatar(radius: 16, backgroundColor: AppColors.surfaceContainerLow, child: Icon(Icons.local_shipping_outlined, size: 16, color: AppColors.primary)),
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: AppColors.surfaceContainerLow,
+            child: Icon(icon, size: 16, color: AppColors.primary),
+          ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(title, style: AppTypography.labelMd),
-              Text(subtitle, style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant)),
-            ]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppTypography.labelMd),
+                Text(subtitle, style: AppTypography.caption.copyWith(color: AppColors.onSurfaceVariant)),
+                const SizedBox(height: 2),
+                Text(meta, style: AppTypography.caption.copyWith(color: AppColors.outline)),
+              ],
+            ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(999)),
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(999),
+            ),
             child: Text(status, style: AppTypography.caption.copyWith(color: statusColor)),
           ),
         ],

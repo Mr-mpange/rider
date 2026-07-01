@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/constants/app_branding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -30,7 +31,7 @@ class SavedPlacesScreen extends StatelessWidget {
               onPressed: () => context.go(AppRoutes.home),
             ),
             title: Text(
-              'RIDER',
+              AppBranding.appName,
               style: AppTypography.textTheme.displayLarge?.copyWith(
                 fontSize: 24,
                 color: AppColors.primary,
@@ -49,23 +50,23 @@ class SavedPlacesScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Sehemu Zilizohifadhiwa', style: AppTypography.headlineMdMobile),
+                  Text('Saved Places', style: AppTypography.headlineMdMobile),
                   const SizedBox(height: 8),
                   Text(
-                    'Weka maeneo unayotembelea mara kwa mara kwa ufikiaji wa haraka.',
+                    'Save places you visit often for quick access.',
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
                       color: AppColors.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 24),
                   AppButton(
-                    label: 'Ongeza Mahali Mapya',
+                    label: 'Add New Place',
                     icon: Icons.add_location_alt,
                     onPressed: () => _showAddPlaceDialog(context),
                   ),
                   const SizedBox(height: 24),
                   if (userId == null)
-                    const Center(child: Text('Ingia kwanza ili kuona maeneo yako'))
+                    const Center(child: Text('Log in first to see your places'))
                   else
                     StreamBuilder<List<SavedPlace>>(
                       stream: context.read<FirestoreService>().watchSavedPlaces(userId),
@@ -95,14 +96,14 @@ class SavedPlacesScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Huduma ya Karibu',
+                          'Nearby Service',
                           style: AppTypography.textTheme.labelLarge?.copyWith(
                             color: AppColors.primary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Tunapendekeza maeneo kulingana na safari zako za hivi karibuni.',
+                          'We suggest places based on your recent trips.',
                           style: AppTypography.textTheme.bodyMedium?.copyWith(
                             color: AppColors.onSurfaceVariant,
                           ),
@@ -142,16 +143,16 @@ class SavedPlacesScreen extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Ongeza Mahali'),
+        title: const Text('Add Place'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: labelController, decoration: const InputDecoration(labelText: 'Jina')),
-            TextField(controller: addressController, decoration: const InputDecoration(labelText: 'Anwani')),
+            TextField(controller: labelController, decoration: const InputDecoration(labelText: 'Label')),
+            TextField(controller: addressController, decoration: const InputDecoration(labelText: 'Address')),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Ghairi')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           TextButton(
             onPressed: () async {
               final userId = context.read<AuthService>().currentUser?.uid;
@@ -168,7 +169,7 @@ class SavedPlacesScreen extends StatelessWidget {
               }
               if (ctx.mounted) Navigator.pop(ctx);
             },
-            child: const Text('Hifadhi'),
+            child: const Text('Save'),
           ),
         ],
       ),
@@ -186,7 +187,7 @@ class _EmptySavedPlaces extends StatelessWidget {
           children: [
             const Icon(Icons.bookmark_border, size: 48, color: AppColors.outline),
             const SizedBox(height: 16),
-            Text('Hakuna maeneo yaliyohifadhiwa', style: AppTypography.textTheme.bodyLarge),
+            Text('No saved places yet', style: AppTypography.textTheme.bodyLarge),
           ],
         ),
       ),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/constants/app_branding.dart';
 import '../core/router/app_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_typography.dart';
+import '../core/utils/app_dialogs.dart';
 
-enum RiderNavTab { home, trips, cargo, wallet, profile }
+enum RiderNavTab { home, tracking, wallet, profile }
 
 class RiderBottomNavBar extends StatelessWidget {
   const RiderBottomNavBar({
@@ -23,7 +25,7 @@ class RiderBottomNavBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surfaceContainerLowest,
         border: Border(top: BorderSide(color: AppColors.outlineVariant.withValues(alpha: 0.4))),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withValues(alpha: 0.06),
@@ -35,7 +37,7 @@ class RiderBottomNavBar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+          padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -46,16 +48,10 @@ class RiderBottomNavBar extends StatelessWidget {
                 onTap: () => _go(context, RiderNavTab.home),
               ),
               _NavItem(
-                icon: Icons.directions_transit,
-                label: 'Trips',
-                selected: currentTab == RiderNavTab.trips,
-                onTap: () => _go(context, RiderNavTab.trips),
-              ),
-              _NavItem(
-                icon: Icons.local_shipping_outlined,
-                label: 'Cargo',
-                selected: currentTab == RiderNavTab.cargo,
-                onTap: () => _go(context, RiderNavTab.cargo),
+                icon: Icons.location_on_outlined,
+                label: 'Tracking',
+                selected: currentTab == RiderNavTab.tracking,
+                onTap: () => _go(context, RiderNavTab.tracking),
               ),
               _NavItem(
                 icon: Icons.account_balance_wallet_outlined,
@@ -81,15 +77,62 @@ class RiderBottomNavBar extends StatelessWidget {
     switch (tab) {
       case RiderNavTab.home:
         context.go(AppRoutes.home);
-      case RiderNavTab.trips:
-        context.go(AppRoutes.rideHailing);
-      case RiderNavTab.cargo:
-        context.go(AppRoutes.cargo);
+      case RiderNavTab.tracking:
+        context.go(AppRoutes.activeTrip);
       case RiderNavTab.wallet:
         context.go(AppRoutes.wallet);
       case RiderNavTab.profile:
         context.go(AppRoutes.profile);
     }
+  }
+}
+
+class RiiderHeader extends StatelessWidget {
+  const RiiderHeader({
+    super.key,
+    this.onMenu,
+    this.onNotifications,
+    this.trailing,
+    this.showBrand = true,
+  });
+
+  final VoidCallback? onMenu;
+  final VoidCallback? onNotifications;
+  final Widget? trailing;
+  final bool showBrand;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (onMenu != null)
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            icon: const Icon(Icons.menu, size: 22, color: AppColors.primary),
+            onPressed: onMenu,
+          ),
+        if (onMenu != null) const SizedBox(width: 8),
+        if (showBrand)
+          Text(
+            AppBranding.appName,
+            style: AppTypography.labelMd.copyWith(color: AppColors.primary, letterSpacing: 2),
+          ),
+        const Spacer(),
+        if (trailing != null) trailing!,
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          icon: const Icon(Icons.notifications_outlined, color: AppColors.primary, size: 22),
+          onPressed: onNotifications ??
+              () => AppDialogs.showInfoSheet(
+                    context,
+                    title: 'Notifications',
+                    body: 'Trip updates, wallet alerts, and shipment status appear here.',
+                  ),
+        ),
+      ],
+    );
   }
 }
 
@@ -113,11 +156,11 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: selected
             ? BoxDecoration(
                 color: AppColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               )
             : null,
         child: Column(

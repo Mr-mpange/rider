@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../core/constants/app_branding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -75,12 +76,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             children: [
               Icon(Icons.directions_car_filled, size: 64, color: AppColors.primary.withValues(alpha: 0.9)),
               const SizedBox(height: 24),
-              Text('RIDER', style: AppTypography.displayLg.copyWith(fontSize: 36)),
+              Text(AppBranding.appName, style: AppTypography.displayLg.copyWith(fontSize: 36)),
               const SizedBox(height: 8),
-              Text(
-                'Premium mobility platform',
-                style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
-              ),
+              Text(AppBranding.tagline, style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
             ],
           ),
         ),

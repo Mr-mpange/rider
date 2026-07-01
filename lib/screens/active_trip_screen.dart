@@ -2,12 +2,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/constants/app_branding.dart';
 import '../core/constants/image_urls.dart';
 import '../core/router/app_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
 import '../widgets/live_tracking_card.dart';
+import '../widgets/rider_bottom_nav_bar.dart';
 
 class ActiveTripScreen extends StatelessWidget {
   const ActiveTripScreen({super.key});
@@ -35,7 +37,7 @@ class ActiveTripScreen extends StatelessWidget {
                         icon: const Icon(Icons.arrow_back, color: Colors.white),
                       ),
                       const SizedBox(width: 10),
-                      Text('Active Trip', style: AppTypography.labelMd.copyWith(color: Colors.white)),
+                      Text(AppBranding.appName, style: AppTypography.labelMd.copyWith(color: Colors.white)),
                     ],
                   ),
                 ),
@@ -94,6 +96,7 @@ class ActiveTripScreen extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: const RiderBottomNavBar(currentTab: RiderNavTab.tracking),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/constants/app_branding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -86,7 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           },
         ),
         title: Text(
-          'RIDER',
+          AppBranding.appName,
           style: AppTypography.textTheme.displayLarge?.copyWith(fontSize: 24, color: AppColors.primary),
         ),
         centerTitle: true,

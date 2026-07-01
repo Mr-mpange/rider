@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/constants/app_branding.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
@@ -18,7 +19,7 @@ class _TransitCopilotScreenState extends State<TransitCopilotScreen> {
   final _messages = <_ChatMessage>[
     const _ChatMessage(
       isUser: false,
-      text: 'Hello! I am your Rider AI copilot. Ask me about routes, freight ports, or wallet analytics.',
+      text: 'Hello! I am your ${AppBranding.appName} AI copilot. Ask me about routes, freight ports, or wallet analytics.',
     ),
   ];
 
@@ -46,7 +47,7 @@ class _TransitCopilotScreenState extends State<TransitCopilotScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Transit AI', style: AppTypography.headlineLgMobile.copyWith(color: AppColors.primary)),
+        title: Text('AI Copilot', style: AppTypography.headlineLgMobile.copyWith(color: AppColors.primary)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => context.pop(),

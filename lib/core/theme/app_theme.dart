@@ -47,12 +47,18 @@ abstract final class AppTheme {
           backgroundColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
+          foregroundColor: AppColors.onSurface,
           systemOverlayStyle: SystemUiOverlayStyle.dark,
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: AppColors.surfaceContainerLowest,
+          modalBackgroundColor: AppColors.surfaceContainerLowest,
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: AppColors.surfaceContainerLow,
           hintStyle: AppTypography.bodyLg.copyWith(color: AppColors.outline),
+          labelStyle: AppTypography.labelMd.copyWith(color: AppColors.onSurfaceVariant),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: AppColors.outlineVariant),
@@ -77,5 +83,20 @@ abstract final class AppTheme {
             textStyle: AppTypography.titleMd,
           ),
         ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.primary,
+            side: const BorderSide(color: AppColors.outlineVariant),
+            minimumSize: const Size(0, 48),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          elevation: 6,
+        ),
       );
+
+  static ThemeData get dark => light;
 }

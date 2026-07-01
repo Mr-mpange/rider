@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/constants/app_branding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -49,7 +50,7 @@ class RouteColorScreen extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'RIDER',
+          AppBranding.appName,
           style: AppTypography.headlineMdMobile.copyWith(color: AppColors.primary),
         ),
         centerTitle: true,

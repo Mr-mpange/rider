@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/constants/app_branding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -137,7 +138,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          'RIDER',
+                          AppBranding.appName,
                           style: AppTypography.textTheme.headlineSmall?.copyWith(color: Colors.white),
                           textAlign: TextAlign.center,
                         ),

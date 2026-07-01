@@ -9,7 +9,7 @@ abstract final class AppTypography {
         fontWeight: FontWeight.w700,
         height: 56 / 48,
         letterSpacing: -1.92,
-        color: AppColors.primary,
+        color: AppColors.onSurface,
       );
 
   static TextStyle get headlineLgMobile => GoogleFonts.inter(

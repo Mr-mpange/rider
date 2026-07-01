@@ -54,7 +54,7 @@ class AppButton extends StatelessWidget {
       height: height,
       child: Material(
         color: enabled ? bg : bg.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(variant == AppButtonVariant.primary ? 12 : 12),
+        borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: effectiveOnPressed == null
               ? null
@@ -83,7 +83,7 @@ class AppButton extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: AppTypography.textTheme.labelLarge?.copyWith(color: fg),
+                    style: AppTypography.labelMd.copyWith(color: fg),
                   ),
                   if (icon != null) ...[
                     const SizedBox(width: 8),

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../core/utils/app_dialogs.dart';
+import '../widgets/glass_card.dart';
 import '../widgets/rider_bottom_nav_bar.dart';
 
 class WalletScreen extends StatefulWidget {
@@ -12,59 +16,29 @@ class WalletScreen extends StatefulWidget {
 }
 
 class _WalletScreenState extends State<WalletScreen> {
-  final _pageController = PageController(initialPage: 0);
-  int _page = 0;
   bool _showBalance = true;
+  int _analysisRange = 0;
 
-  final _cards = const [
-    _WalletCardData(
-      title: 'Main Wallet Balance',
-      balance: 'TSh 142,580.00',
-      rate: '+12.4%',
-      accent: AppColors.primary,
-    ),
-    _WalletCardData(
-      title: 'Savings Wallet',
-      balance: 'TSh 38,200.00',
-      rate: '+4.1%',
-      accent: AppColors.secondary,
-    ),
+  final _transactions = const [
+    _Txn(icon: Icons.local_shipping_outlined, title: 'Freight: Zone B to Hub', subtitle: 'Today, 10:24 AM • Logistics', amount: 'Pending', pending: true),
+    _Txn(icon: Icons.account_balance, title: 'Wallet Top Up', subtitle: 'Yesterday, 4:15 PM • Bank Transfer', amount: 'Completed'),
+    _Txn(icon: Icons.ac_unit, title: 'Cold Cargo Service', subtitle: '22 Oct 2023 • Maintenance', amount: 'Completed'),
+    _Txn(icon: Icons.directions_bus, title: 'Staff Shuttle Monthly', subtitle: '21 Oct 2023 • Operations', amount: 'Completed'),
+    _Txn(icon: Icons.person_outline, title: 'P2P Transfer from Sarah K.', subtitle: '18 Oct 2023 • Wallet', amount: 'Completed'),
   ];
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
 
   void _openAction(String action) {
     switch (action) {
       case 'topup':
-        _showSheet(
-          title: 'Top Up Wallet',
-          body: 'Choose a payment source and load funds instantly.',
-          cta: 'Proceed to Top Up',
-        );
+        _showSheet(title: 'Top Up Wallet', body: 'Choose a payment source and load funds instantly.', cta: 'Proceed to Top Up');
+      case 'withdraw':
+        _showSheet(title: 'Withdraw', body: 'Move funds from your RIIDER wallet to your linked bank account.', cta: 'Proceed to Withdraw');
       case 'send':
-        _showSheet(
-          title: 'Send Money',
-          body: 'Transfer funds to another Rider wallet or mobile money account.',
-          cta: 'Proceed to Send',
-        );
-      case 'details':
-        _showSheet(
-          title: 'Wallet Details',
-          body: 'View linked cards, limits, and transaction history.',
-          cta: 'Open Details',
-        );
+        _showSheet(title: 'Send Money', body: 'Transfer funds to another RIIDER wallet or mobile money account.', cta: 'Proceed to Send');
     }
   }
 
-  void _showSheet({
-    required String title,
-    required String body,
-    required String cta,
-  }) {
+  void _showSheet({required String title, required String body, required String cta}) {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -80,10 +54,7 @@ class _WalletScreenState extends State<WalletScreen> {
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(cta),
-              ),
+              child: ElevatedButton(onPressed: () => Navigator.pop(context), child: Text(cta)),
             ),
           ],
         ),
@@ -93,35 +64,31 @@ class _WalletScreenState extends State<WalletScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final card = _cards[_page];
-    final balanceText = _showBalance ? card.balance : 'TSh ••••••';
+    final balanceText = _showBalance ? 'TSh 142,580.00' : 'TSh ••••••';
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 8, AppSpacing.marginMobile, 110),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 118),
           children: [
-            Row(
-              children: [
-                Text('RIDER', style: AppTypography.labelMd.copyWith(color: AppColors.primary)),
-                const Spacer(),
-                const Icon(Icons.notifications_outlined, color: AppColors.primary),
-              ],
-            ),
+            RiiderHeader(onMenu: () => context.pop()),
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: card.accent,
+                gradient: AppColors.walletGradient,
                 borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(color: AppColors.primary.withValues(alpha: 0.12), blurRadius: 30, offset: const Offset(0, 10)),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Text(card.title.toUpperCase(), style: AppTypography.caption.copyWith(color: Colors.white70, letterSpacing: 2)),
+                      Text('AVAILABLE BALANCE', style: AppTypography.caption.copyWith(color: Colors.white70, letterSpacing: 2)),
                       const Spacer(),
                       IconButton(
                         onPressed: () => setState(() => _showBalance = !_showBalance),
@@ -129,132 +96,96 @@ class _WalletScreenState extends State<WalletScreen> {
                       ),
                     ],
                   ),
-                  Text.rich(
-                    TextSpan(
-                      style: AppTypography.displayLg.copyWith(color: Colors.white, fontSize: 38),
-                      children: [
-                        TextSpan(text: balanceText),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
+                  Text(balanceText, style: AppTypography.displayLg.copyWith(color: Colors.white, fontSize: 36)),
+                  const SizedBox(height: 14),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(999)),
-                    child: Text(card.rate, style: AppTypography.labelMd.copyWith(color: Colors.white)),
+                    child: Text('RIIDER PAY', style: AppTypography.labelMd.copyWith(color: Colors.white)),
                   ),
                   const SizedBox(height: 18),
                   Row(
                     children: [
                       Expanded(child: _WalletAction(icon: Icons.add, label: 'Top Up', filled: true, onTap: () => _openAction('topup'))),
                       const SizedBox(width: 10),
-                      Expanded(child: _WalletAction(icon: Icons.send, label: 'Send', onTap: () => _openAction('send'))),
+                      Expanded(child: _WalletAction(icon: Icons.payments_outlined, label: 'Withdraw', onTap: () => _openAction('withdraw'))),
                       const SizedBox(width: 10),
-                      Expanded(child: _WalletAction(icon: Icons.credit_card, label: 'Details', onTap: () => _openAction('details'))),
+                      Expanded(child: _WalletAction(icon: Icons.send, label: 'Send', onTap: () => _openAction('send'))),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
-            SizedBox(
-              height: 220,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: _cards.length,
-                onPageChanged: (value) => setState(() => _page = value),
-                itemBuilder: (context, index) {
-                  final active = index == _page;
-                  final item = _cards[index];
-                  return AnimatedScale(
-                    scale: active ? 1 : 0.94,
-                    duration: const Duration(milliseconds: 200),
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Container(
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceContainerLowest,
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: active ? AppColors.primary : AppColors.outlineVariant.withValues(alpha: 0.35),
-                            width: active ? 2 : 1,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(item.title, style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
-                            const Spacer(),
-                            Text('•••• •••• •••• 8842', style: AppTypography.headlineMdMobile.copyWith(fontSize: 22, letterSpacing: 3)),
-                            const Spacer(),
-                            Text('CARD HOLDER', style: AppTypography.caption),
-                            const SizedBox(height: 2),
-                            Text('KWAME MENSAH', style: AppTypography.labelMd),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_cards.length, (index) {
-                final active = index == _page;
-                return GestureDetector(
-                  onTap: () => _pageController.animateToPage(
-                    index,
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeOut,
-                  ),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: active ? 22 : 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: active ? AppColors.primary : AppColors.outlineVariant,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                );
-              }),
-            ),
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainerLowest,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.35)),
-              ),
+            const SizedBox(height: 16),
+            GlassCard(
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Text('Spending Analytics', style: AppTypography.labelMd),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: () => _showSheet(
-                          title: 'Analytics',
-                          body: 'Monthly spend, top routes, and wallet movement charts.',
-                          cta: 'Open Analytics',
-                        ),
-                        child: const Text('Open'),
-                      ),
+                      const Icon(Icons.account_balance_wallet_outlined, color: AppColors.primary),
+                      const SizedBox(width: 8),
+                      Text('Card Holder', style: AppTypography.caption),
                     ],
                   ),
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    height: 160,
-                    child: CustomPaint(painter: _ChartPainter()),
+                  const SizedBox(height: 8),
+                  Text('Alex Sterling', style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Text('Expires 09/27', style: AppTypography.caption),
+                      const Spacer(),
+                      Text('•••• 8842', style: AppTypography.labelMd.copyWith(letterSpacing: 2)),
+                    ],
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 18),
+            GlassCard(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Spending Analysis', style: AppTypography.labelMd.copyWith(letterSpacing: 1)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _RangeChip(label: 'Last 6 Months', selected: _analysisRange == 0, onTap: () => setState(() => _analysisRange = 0)),
+                      const SizedBox(width: 8),
+                      _RangeChip(label: 'Last 30 Days', selected: _analysisRange == 1, onTap: () => setState(() => _analysisRange = 1)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(height: 160, child: CustomPaint(painter: _ChartPainter())),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      _LegendDot(color: AppColors.primary, label: 'Earnings'),
+                      const SizedBox(width: 16),
+                      _LegendDot(color: AppColors.secondaryContainer, label: 'Logistics Spend'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Text('Transaction History', style: AppTypography.labelMd.copyWith(letterSpacing: 1)),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => AppDialogs.showSearchSheet(context, hint: 'Search transactions'),
+                  icon: const Icon(Icons.search, color: AppColors.primary),
+                ),
+                IconButton(
+                  onPressed: () => AppDialogs.showInfoSheet(context, title: 'Filter', body: 'Filter by date, type, or status.', cta: 'Apply'),
+                  icon: const Icon(Icons.tune, color: AppColors.primary),
+                ),
+              ],
+            ),
+            ..._transactions.map((t) => _TxnTile(txn: t)),
           ],
         ),
       ),
@@ -263,28 +194,8 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 }
 
-class _WalletCardData {
-  const _WalletCardData({
-    required this.title,
-    required this.balance,
-    required this.rate,
-    required this.accent,
-  });
-
-  final String title;
-  final String balance;
-  final String rate;
-  final Color accent;
-}
-
 class _WalletAction extends StatelessWidget {
-  const _WalletAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.filled = false,
-  });
-
+  const _WalletAction({required this.icon, required this.label, required this.onTap, this.filled = false});
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -313,29 +224,124 @@ class _WalletAction extends StatelessWidget {
   }
 }
 
+class _RangeChip extends StatelessWidget {
+  const _RangeChip({required this.label, required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : AppColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(label, style: AppTypography.caption.copyWith(color: selected ? Colors.white : AppColors.onSurface)),
+      ),
+    );
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  const _LegendDot({required this.color, required this.label});
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 6),
+        Text(label, style: AppTypography.caption),
+      ],
+    );
+  }
+}
+
+class _Txn {
+  const _Txn({required this.icon, required this.title, required this.subtitle, required this.amount, this.pending = false});
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String amount;
+  final bool pending;
+}
+
+class _TxnTile extends StatelessWidget {
+  const _TxnTile({required this.txn});
+  final _Txn txn;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: AppColors.surfaceContainerLow,
+            child: Icon(txn.icon, size: 18, color: AppColors.primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(txn.title, style: AppTypography.labelMd),
+                Text(txn.subtitle, style: AppTypography.caption),
+              ],
+            ),
+          ),
+          Text(
+            txn.amount,
+            style: AppTypography.caption.copyWith(
+              color: txn.pending ? AppColors.secondaryContainer : AppColors.secondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final axis = Paint()
-      ..color = AppColors.outlineVariant.withValues(alpha: 0.3)
-      ..strokeWidth = 1;
-    final line = Paint()
-      ..color = AppColors.primary
-      ..strokeWidth = 4
-      ..style = PaintingStyle.stroke;
+    final axis = Paint()..color = AppColors.outlineVariant.withValues(alpha: 0.3)..strokeWidth = 1;
+    final earnings = Paint()..color = AppColors.primary..strokeWidth = 3..style = PaintingStyle.stroke;
+    final spend = Paint()..color = AppColors.secondaryContainer..strokeWidth = 3..style = PaintingStyle.stroke;
 
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), axis);
-    canvas.drawLine(const Offset(0, 0), Offset(0, size.height), axis);
 
-    final path = Path()
-      ..moveTo(0, size.height * 0.78)
-      ..lineTo(size.width * 0.15, size.height * 0.60)
-      ..lineTo(size.width * 0.32, size.height * 0.68)
-      ..lineTo(size.width * 0.50, size.height * 0.38)
-      ..lineTo(size.width * 0.68, size.height * 0.48)
-      ..lineTo(size.width * 0.84, size.height * 0.20)
-      ..lineTo(size.width, size.height * 0.30);
-    canvas.drawPath(path, line);
+    final ePath = Path()
+      ..moveTo(0, size.height * 0.7)
+      ..lineTo(size.width * 0.2, size.height * 0.55)
+      ..lineTo(size.width * 0.4, size.height * 0.62)
+      ..lineTo(size.width * 0.6, size.height * 0.4)
+      ..lineTo(size.width * 0.8, size.height * 0.48)
+      ..lineTo(size.width, size.height * 0.25);
+    canvas.drawPath(ePath, earnings);
+
+    final sPath = Path()
+      ..moveTo(0, size.height * 0.82)
+      ..lineTo(size.width * 0.2, size.height * 0.75)
+      ..lineTo(size.width * 0.4, size.height * 0.78)
+      ..lineTo(size.width * 0.6, size.height * 0.65)
+      ..lineTo(size.width * 0.8, size.height * 0.7)
+      ..lineTo(size.width, size.height * 0.58);
+    canvas.drawPath(sPath, spend);
   }
 
   @override

@@ -4,10 +4,13 @@ import 'package:provider/provider.dart';
 
 import '../core/router/app_router.dart';
 import '../core/services/auth_service.dart';
+import '../core/constants/app_branding.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../core/utils/app_dialogs.dart';
 import '../widgets/app_button.dart';
+import '../widgets/glass_card.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,16 +24,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   String? _error;
   bool _busy = false;
+  bool _obscure = true;
 
   Future<void> _submit() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    if (email.isEmpty || !email.contains('@')) {
-      setState(() => _error = 'Enter a valid email');
+    if (email.isEmpty) {
+      setState(() => _error = 'Enter your email or phone');
       return;
     }
     if (password.isEmpty) {
       setState(() => _error = 'Enter your password');
+      return;
+    }
+    if (!email.contains('@')) {
+      setState(() => _error = 'Use a valid email for sign in');
       return;
     }
 
@@ -40,15 +48,10 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await context.read<AuthService>().signInWithEmail(
-            email: email,
-            password: password,
-          );
+      await context.read<AuthService>().signInWithEmail(email: email, password: password);
       if (mounted) context.go(AppRoutes.home);
     } catch (e) {
-      if (mounted) {
-        setState(() => _error = 'Email au password si sahihi');
-      }
+      if (mounted) setState(() => _error = 'Email au password si sahihi');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -73,44 +76,79 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               Row(
                 children: [
-                  Text('RIDER', style: AppTypography.textTheme.labelLarge?.copyWith(color: AppColors.primary)),
+                  Text(AppBranding.appName, style: AppTypography.labelMd.copyWith(color: AppColors.primary, letterSpacing: 2)),
                   const Spacer(),
-                  TextButton(onPressed: () {}, child: const Text('Support')),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceContainer,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text('Logistics.', style: AppTypography.caption.copyWith(color: AppColors.primary)),
+                  ),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
               Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLowest,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.35)),
-                  boxShadow: [
-                    BoxShadow(color: AppColors.primary.withValues(alpha: 0.06), blurRadius: 24, offset: const Offset(0, 8)),
+                  color: AppColors.primaryFixed.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.primaryFixedDim.withValues(alpha: 0.4)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(color: AppColors.secondaryContainer, shape: BoxShape.circle),
+                    ),
+                    const SizedBox(width: 8),
+                    Text('Live Network Pulse', style: AppTypography.caption.copyWith(color: AppColors.primary)),
                   ],
                 ),
+              ),
+              const SizedBox(height: 20),
+              GlassCard(
+                padding: const EdgeInsets.all(24),
+                premium: true,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Welcome Back', style: AppTypography.headlineMdMobile.copyWith(color: AppColors.onSurface)),
+                    Text('Welcome Back', style: AppTypography.headlineMdMobile),
                     const SizedBox(height: 8),
-                    Text('Login to your Rider account.', style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
+                    Text(
+                      'Access your logistics control tower.',
+                      style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+                    ),
                     const SizedBox(height: 24),
                     _Field(
                       controller: _emailController,
-                      label: 'Email',
+                      label: 'EMAIL OR PHONE',
                       hint: 'name@example.com',
-                      icon: Icons.email_outlined,
+                      icon: Icons.alternate_email,
                       keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 16),
                     _Field(
                       controller: _passwordController,
-                      label: 'Password',
+                      label: 'PASSWORD',
                       hint: 'Enter your password',
                       icon: Icons.lock_outline,
-                      obscureText: true,
+                      obscureText: _obscure,
+                      suffix: IconButton(
+                        icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                        onPressed: () => setState(() => _obscure = !_obscure),
+                      ),
+                      labelTrailing: TextButton(
+                        onPressed: () => AppDialogs.showInfoSheet(
+                          context,
+                          title: 'Reset Password',
+                          body: 'A password reset link will be sent to your registered email.',
+                          cta: 'Send Reset Link',
+                        ),
+                        child: const Text('Forgot?'),
+                      ),
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 8),
@@ -122,12 +160,94 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: _busy ? null : _submit,
                       enabled: !_busy,
                     ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: AppColors.outlineVariant.withValues(alpha: 0.6))),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text('OR CONTINUE WITH', style: AppTypography.caption.copyWith(letterSpacing: 1)),
+                        ),
+                        Expanded(child: Divider(color: AppColors.outlineVariant.withValues(alpha: 0.6))),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => AppDialogs.showInfoSheet(
+                              context,
+                              title: 'Google Sign In',
+                              body: 'Continue with your Google workspace account.',
+                              cta: 'Continue',
+                            ),
+                            icon: const Icon(Icons.g_mobiledata, size: 22),
+                            label: const Text('Google'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => AppDialogs.showInfoSheet(
+                              context,
+                              title: 'Apple Sign In',
+                              body: 'Continue with your Apple ID.',
+                              cta: 'Continue',
+                            ),
+                            icon: const Icon(Icons.apple, size: 20),
+                            label: const Text('Apple'),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 16),
                     Center(
                       child: TextButton(
                         onPressed: () => context.go(AppRoutes.register),
-                        child: const Text('Create new account'),
+                        child: const Text('Create an account'),
                       ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 16,
+                  children: [
+                    TextButton(
+                      onPressed: () => AppDialogs.showInfoSheet(
+                        context,
+                        title: 'Privacy Policy',
+                        body: 'Review how RIIDER protects your logistics and personal data.',
+                        cta: 'Close',
+                      ),
+                      child: const Text('Privacy Policy'),
+                    ),
+                    TextButton(
+                      onPressed: () => AppDialogs.showInfoSheet(
+                        context,
+                        title: 'Terms of Service',
+                        body: 'Review the RIIDER platform terms and enterprise usage policy.',
+                        cta: 'Close',
+                      ),
+                      child: const Text('Terms of Service'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.verified_user_outlined, size: 14, color: AppColors.outline),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Secure Enterprise Login • 256-bit Encryption',
+                      style: AppTypography.caption.copyWith(color: AppColors.outline),
                     ),
                   ],
                 ),
@@ -148,6 +268,8 @@ class _Field extends StatelessWidget {
     required this.icon,
     this.keyboardType,
     this.obscureText = false,
+    this.suffix,
+    this.labelTrailing,
   });
 
   final TextEditingController controller;
@@ -156,17 +278,24 @@ class _Field extends StatelessWidget {
   final IconData icon;
   final TextInputType? keyboardType;
   final bool obscureText;
+  final Widget? suffix;
+  final Widget? labelTrailing;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTypography.textTheme.labelLarge),
+        Row(
+          children: [
+            Text(label, style: AppTypography.caption.copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w700)),
+            if (labelTrailing != null) ...[const Spacer(), labelTrailing!],
+          ],
+        ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainerLowest,
+            color: AppColors.surfaceContainerLow,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.outlineVariant),
           ),
@@ -179,6 +308,7 @@ class _Field extends StatelessWidget {
               border: InputBorder.none,
               contentPadding: const EdgeInsets.all(16),
               prefixIcon: Icon(icon, color: AppColors.outline),
+              suffixIcon: suffix,
             ),
           ),
         ),

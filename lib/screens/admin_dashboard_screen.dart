@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/constants/app_branding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -97,7 +98,7 @@ class _Sidebar extends StatelessWidget {
           children: [
             const Padding(
               padding: EdgeInsets.all(22),
-              child: Text('RIDER', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.primary)),
+              child: Text(AppBranding.appName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.primary)),
             ),
             _NavItem(icon: Icons.dashboard_outlined, label: 'Overview', active: true),
             _NavItem(icon: Icons.place_outlined, label: 'Nearby Stops', onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nearby stops not wired.')))),

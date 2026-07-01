@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/constants/app_branding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -32,13 +33,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Future<void> _submit() async {
     if (_selectedType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Chagua aina ya ripoti')),
+        const SnackBar(content: Text('Choose a report type')),
       );
       return;
     }
     if (_descriptionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Eleza tatizo')),
+        const SnackBar(content: Text('Describe the issue')),
       );
       return;
     }
@@ -46,7 +47,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     final userId = context.read<AuthService>().currentUser?.uid;
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ingia kwanza')),
+        const SnackBar(content: Text('Please log in first')),
       );
       return;
     }
@@ -60,7 +61,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ripoti imetumwa. Asante!')),
+          const SnackBar(content: Text('Report sent. Thank you!')),
         );
         _descriptionController.clear();
         setState(() => _selectedType = null);
@@ -88,7 +89,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               onPressed: () => context.go(AppRoutes.home),
             ),
             title: Text(
-              'RIDER',
+              AppBranding.appName,
               style: AppTypography.textTheme.displayLarge?.copyWith(
                 fontSize: 24,
                 color: AppColors.primary,
@@ -98,7 +99,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 IconButton(
                   icon: const Icon(Icons.help_outline, color: AppColors.primary),
                   onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Report guidance is shown in the support center.')),
+                    const SnackBar(content: Text('Report guidance is available in the support center.')),
                   ),
                 ),
               ],
@@ -109,17 +110,17 @@ class _ReportsScreenState extends State<ReportsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Ripoti & Maoni', style: AppTypography.headlineMdMobile),
+                  Text('Reports & Feedback', style: AppTypography.headlineMdMobile),
                   const SizedBox(height: 8),
                   Text(
-                    'Tusaidie kuboresha huduma kwa kuripoti matatizo.',
+                    'Help us improve the service by reporting issues.',
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
                       color: AppColors.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 32),
                   Text(
-                    'CHAGUA AINA YA RIPOTI',
+                    'SELECT REPORT TYPE',
                     style: AppTypography.textTheme.labelLarge?.copyWith(
                       color: AppColors.primary,
                       letterSpacing: 1,
@@ -166,7 +167,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     controller: _descriptionController,
                     maxLines: 4,
                     decoration: const InputDecoration(
-                      hintText: 'Elezea kwa ufupi tatizo ulilokutana nalo...',
+                      hintText: 'Briefly describe the issue you experienced...',
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -183,7 +184,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   ),
                   const SizedBox(height: 32),
                   AppButton(
-                    label: 'Tuma Ripoti',
+                    label: 'Submit Report',
                     onPressed: _submitting ? null : _submit,
                     enabled: !_submitting,
                   ),
