@@ -167,168 +167,172 @@ class _RideHailingScreenState extends State<RideHailingScreen> {
               onDestinationTap: _pickDestination,
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 12 + MediaQuery.of(context).padding.bottom),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 520),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(36),
-                  child: Container(
-                    color: AppColors.surface,
-                    child: SafeArea(
-                      top: false,
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.50,
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 14, AppSpacing.marginMobile, 18),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                            Center(
-                              child: Container(
-                                width: 42,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: AppColors.outlineVariant.withValues(alpha: 0.8),
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            Text(
-                              'Live ride setup',
-                              style: AppTypography.labelMd.copyWith(letterSpacing: 1.1),
-                            ),
-                            const SizedBox(height: 12),
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.28)),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _RouteRow(
-                                    title: 'PICKUP',
-                                    value: _pickupController.text,
-                                    icon: Icons.my_location,
-                                  ),
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 12),
-                                    child: Divider(height: 1),
-                                  ),
-                                  _RouteRow(
-                                    title: 'DESTINATION',
-                                    value: _destinationController.text,
-                                    icon: Icons.location_on,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Vehicle Categories',
-                              style: AppTypography.caption.copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w700),
-                            ),
-                            const SizedBox(height: 10),
-                            SizedBox(
-                              height: 96,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: _categories.length,
-                                separatorBuilder: (_, _) => const SizedBox(width: 8),
-                                itemBuilder: (context, index) {
-                                  final item = _categories[index];
-                                  final isSelected = index == _selectedCategory;
-                                  return GestureDetector(
-                                    onTap: () {
-                                      setState(() => _selectedCategory = index);
-                                      _confirmRide();
-                                    },
-                                    child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 180),
-                                      width: 92,
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                      decoration: BoxDecoration(
-                                        color: isSelected ? AppColors.primary : AppColors.surfaceContainerLowest,
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color: isSelected ? AppColors.primary : AppColors.outlineVariant.withValues(alpha: 0.4),
-                                        ),
-                                        boxShadow: isSelected
-                                            ? [
-                                                BoxShadow(
-                                                  color: AppColors.primary.withValues(alpha: 0.16),
-                                                  blurRadius: 18,
-                                                  offset: const Offset(0, 8),
-                                                ),
-                                              ]
-                                            : null,
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(item.icon, color: isSelected ? Colors.white : AppColors.primary, size: 20),
-                                          const SizedBox(height: 6),
-                                          Text(
-                                            item.label,
-                                            textAlign: TextAlign.center,
-                                            style: AppTypography.caption.copyWith(
-                                              color: isSelected ? Colors.white : AppColors.onSurface,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+          DraggableScrollableSheet(
+            initialChildSize: 0.38,
+            minChildSize: 0.24,
+            maxChildSize: 0.78,
+            builder: (context, scrollController) {
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 12 + MediaQuery.of(context).padding.bottom),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(36),
+                      child: Container(
+                        color: AppColors.surface,
+                        child: SafeArea(
+                          top: false,
+                          child: SingleChildScrollView(
+                            controller: scrollController,
+                            padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 14, AppSpacing.marginMobile, 18),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Center(
+                                  child: Container(
+                                    width: 42,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.outlineVariant.withValues(alpha: 0.8),
+                                      borderRadius: BorderRadius.circular(999),
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceContainerLow,
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.35)),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.credit_card, color: AppColors.primary),
-                                  const SizedBox(width: 10),
-                                  Text('VISA', style: AppTypography.labelMd),
-                                  const Spacer(),
-                                  TextButton(
-                                    onPressed: () => context.push(AppRoutes.paymentMethods),
-                                    child: const Text('Change'),
                                   ),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(height: 14),
+                                Text(
+                                  'Live ride setup',
+                                  style: AppTypography.labelMd.copyWith(letterSpacing: 1.1),
+                                ),
+                                const SizedBox(height: 12),
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.28)),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _RouteRow(
+                                        title: 'PICKUP',
+                                        value: _pickupController.text,
+                                        icon: Icons.my_location,
+                                      ),
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 12),
+                                        child: Divider(height: 1),
+                                      ),
+                                      _RouteRow(
+                                        title: 'DESTINATION',
+                                        value: _destinationController.text,
+                                        icon: Icons.location_on,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Vehicle Categories',
+                                  style: AppTypography.caption.copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w700),
+                                ),
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  height: 96,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: _categories.length,
+                                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                                    itemBuilder: (context, index) {
+                                      final item = _categories[index];
+                                      final isSelected = index == _selectedCategory;
+                                      return GestureDetector(
+                                        onTap: () {
+                                          setState(() => _selectedCategory = index);
+                                          _confirmRide();
+                                        },
+                                        child: AnimatedContainer(
+                                          duration: const Duration(milliseconds: 180),
+                                          width: 92,
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                          decoration: BoxDecoration(
+                                            color: isSelected ? AppColors.primary : AppColors.surfaceContainerLowest,
+                                            borderRadius: BorderRadius.circular(16),
+                                            border: Border.all(
+                                              color: isSelected ? AppColors.primary : AppColors.outlineVariant.withValues(alpha: 0.4),
+                                            ),
+                                            boxShadow: isSelected
+                                                ? [
+                                                    BoxShadow(
+                                                      color: AppColors.primary.withValues(alpha: 0.16),
+                                                      blurRadius: 18,
+                                                      offset: const Offset(0, 8),
+                                                    ),
+                                                  ]
+                                                : null,
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(item.icon, color: isSelected ? Colors.white : AppColors.primary, size: 20),
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                item.label,
+                                                textAlign: TextAlign.center,
+                                                style: AppTypography.caption.copyWith(
+                                                  color: isSelected ? Colors.white : AppColors.onSurface,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surfaceContainerLow,
+                                    borderRadius: BorderRadius.circular(18),
+                                    border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.35)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.credit_card, color: AppColors.primary),
+                                      const SizedBox(width: 10),
+                                      Text('VISA', style: AppTypography.labelMd),
+                                      const Spacer(),
+                                      TextButton(
+                                        onPressed: () => context.push(AppRoutes.paymentMethods),
+                                        child: const Text('Change'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: _confirmRide,
+                                    icon: const Icon(Icons.trending_flat),
+                                    label: const Text('Start live tracking'),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 14),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                onPressed: _confirmRide,
-                                icon: const Icon(Icons.trending_flat),
-                                label: Text('Start live tracking'),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            ],
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
           const Positioned(left: 0, right: 0, bottom: 0, child: RiderBottomNavBar(currentTab: RiderNavTab.home)),
         ],
