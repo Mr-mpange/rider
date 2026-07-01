@@ -7,6 +7,7 @@ import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
 import '../core/utils/app_dialogs.dart';
 import '../widgets/live_tracking_card.dart';
+import '../widgets/rider_bottom_nav_bar.dart';
 
 class CargoScreen extends StatelessWidget {
   const CargoScreen({super.key});
@@ -17,7 +18,7 @@ class CargoScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 118),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.marginMobile, 16, AppSpacing.marginMobile, 24),
           children: [
             Row(
               children: [
@@ -191,6 +192,7 @@ class CargoScreen extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: const RiderBottomNavBar(currentTab: RiderNavTab.home),
     );
   }
 }

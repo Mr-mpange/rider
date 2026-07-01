@@ -13,7 +13,16 @@ import '../core/theme/app_typography.dart';
 import '../widgets/shimmer_loading.dart';
 
 class DestinationSearchScreen extends StatefulWidget {
-  const DestinationSearchScreen({super.key});
+  const DestinationSearchScreen({
+    super.key,
+    this.returnSelection = false,
+    this.origin = 'Kituo cha Ubungo',
+    this.selectionLabel = 'destination',
+  });
+
+  final bool returnSelection;
+  final String origin;
+  final String selectionLabel;
 
   @override
   State<DestinationSearchScreen> createState() => _DestinationSearchScreenState();
@@ -45,9 +54,14 @@ class _DestinationSearchScreenState extends State<DestinationSearchScreen> {
             subtitle: subtitle,
           );
     }
+    if (widget.returnSelection) {
+      Navigator.pop(context, name);
+      return;
+    }
+
     context.push(
       AppRoutes.routeRecommendation,
-      extra: {'origin': 'Kituo cha Ubungo', 'destination': name},
+      extra: {'origin': widget.origin, 'destination': name},
     );
   }
 
@@ -68,7 +82,7 @@ class _DestinationSearchScreenState extends State<DestinationSearchScreen> {
               onPressed: () => context.pop(),
             ),
             title: Text(
-              AppBranding.appName,
+              widget.returnSelection ? 'Select ${widget.selectionLabel}' : AppBranding.appName,
               style: AppTypography.headlineMdMobile.copyWith(color: AppColors.primary),
             ),
             actions: const [

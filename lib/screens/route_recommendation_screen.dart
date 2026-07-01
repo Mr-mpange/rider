@@ -11,6 +11,7 @@ import '../core/services/firestore_service.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../core/utils/navigation_utils.dart';
 import '../widgets/app_bottom_nav_bar.dart';
 import '../widgets/app_button.dart';
 import '../widgets/shimmer_loading.dart';
@@ -33,8 +34,8 @@ class RouteRecommendationScreen extends StatelessWidget {
         children: [
           AppBar(
             leading: IconButton(
-              icon: const Icon(Icons.menu, color: AppColors.primary),
-              onPressed: () => context.pop(),
+              icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+              onPressed: () => popOrGoHome(context),
             ),
             title: Text(
               AppBranding.appName,

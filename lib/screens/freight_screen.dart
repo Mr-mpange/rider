@@ -124,6 +124,7 @@ class FreightScreen extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: const RiderBottomNavBar(currentTab: RiderNavTab.home),
     );
   }
 }
@@ -214,9 +215,17 @@ class _CarrierCard extends StatelessWidget {
             children: [
               Expanded(child: Text('Est. Transit\n$transit', style: AppTypography.caption)),
               Expanded(child: Text('Reliability\n$reliability', style: AppTypography.caption)),
-              ElevatedButton(
-                onPressed: () => AppDialogs.showInfoSheet(context, title: 'Select Carrier', body: 'Carrier $name selected for this shipment.', cta: 'Confirm'),
-                child: const Text('Select'),
+              SizedBox(
+                width: 96,
+                child: ElevatedButton(
+                  onPressed: () => AppDialogs.showInfoSheet(
+                    context,
+                    title: 'Select Carrier',
+                    body: 'Carrier $name selected for this shipment.',
+                    cta: 'Confirm',
+                  ),
+                  child: const Text('Select'),
+                ),
               ),
             ],
           ),

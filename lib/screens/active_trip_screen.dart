@@ -1,9 +1,12 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../core/theme/app_colors.dart';
+import '../core/theme/app_typography.dart';
+import '../core/utils/navigation_utils.dart';
 
 class ActiveTripScreen extends StatefulWidget {
   const ActiveTripScreen({super.key});
@@ -34,102 +37,181 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _center,
-              initialZoom: 13.5,
-              interactionOptions: const InteractionOptions(
-                flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom,
+          Positioned.fill(
+            child: FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: _center,
+                initialZoom: 13.5,
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom,
+                ),
               ),
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.usafir.rider',
-              ),
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: _route,
-                    strokeWidth: 6,
-                    color: AppColors.primary,
-                  ),
-                ],
-              ),
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    point: _pickup,
-                    width: 42,
-                    height: 42,
-                    child: const Icon(Icons.circle, color: Colors.green, size: 18),
-                  ),
-                  Marker(
-                    point: _driver,
-                    width: 52,
-                    height: 52,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: Colors.white, width: 3),
-                      ),
-                      child: const Icon(Icons.directions_car, color: Colors.white, size: 24),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.usafir.rider',
+                ),
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: _route,
+                      strokeWidth: 6,
+                      color: AppColors.primary,
                     ),
-                  ),
-                  Marker(
-                    point: _dropoff,
-                    width: 42,
-                    height: 42,
-                    child: const Icon(Icons.location_on, color: Colors.deepOrange, size: 30),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _pickup,
+                      width: 42,
+                      height: 42,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.secondaryContainer, width: 4),
+                        ),
+                        child: const Icon(Icons.storefront_rounded, color: AppColors.secondary, size: 18),
+                      ),
+                    ),
+                    Marker(
+                      point: _driver,
+                      width: 68,
+                      height: 68,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.30),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.directions_car_rounded, color: Colors.white, size: 30),
+                      ),
+                    ),
+                    Marker(
+                      point: _dropoff,
+                      width: 42,
+                      height: 42,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.secondaryContainer, width: 4),
+                        ),
+                        child: const Icon(Icons.flag_rounded, color: AppColors.secondary, size: 18),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withValues(alpha: 0.18),
-                  Colors.transparent,
-                  Colors.black.withValues(alpha: 0.10),
-                ],
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.02),
+                      Colors.black.withValues(alpha: 0.06),
+                      Colors.black.withValues(alpha: 0.24),
+                    ],
+                    stops: const [0.0, 0.55, 1.0],
+                  ),
+                ),
               ),
             ),
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
               child: Row(
                 children: [
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () => context.pop(),
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  _RoundIconButton(
+                    icon: Icons.arrow_back_rounded,
+                    onTap: () => popOrGoHome(context),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: BackdropFilter(
+                          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 270),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.72),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.45)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.location_on_rounded, size: 18, color: AppColors.primary),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Destination: Market St.',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.caption.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          Positioned(
-            right: 16,
-            top: MediaQuery.of(context).size.height * 0.28,
-            child: FloatingActionButton.small(
-              heroTag: 'center_trip_map',
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primary,
-              onPressed: () => _mapController.move(_driver, 14.5),
-              child: const Icon(Icons.my_location),
-            ),
-          ),
         ],
+      ),
+    );
+  }
+}
+
+class _RoundIconButton extends StatelessWidget {
+  const _RoundIconButton({required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.94),
+      shape: const CircleBorder(),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Icon(icon, color: AppColors.primary),
+        ),
       ),
     );
   }

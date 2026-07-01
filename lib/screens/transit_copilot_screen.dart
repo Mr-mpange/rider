@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../core/constants/app_branding.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
+import '../core/utils/navigation_utils.dart';
 import '../widgets/glass_card.dart';
 
 class TransitCopilotScreen extends StatefulWidget {
@@ -50,7 +50,7 @@ class _TransitCopilotScreenState extends State<TransitCopilotScreen> {
         title: Text('AI Copilot', style: AppTypography.headlineLgMobile.copyWith(color: AppColors.primary)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
-          onPressed: () => context.pop(),
+          onPressed: () => popOrGoHome(context),
         ),
       ),
       body: Column(

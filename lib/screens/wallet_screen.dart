@@ -122,32 +122,6 @@ class _WalletScreenState extends State<WalletScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.account_balance_wallet_outlined, color: AppColors.primary),
-                      const SizedBox(width: 8),
-                      Text('Card Holder', style: AppTypography.caption),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text('Alex Sterling', style: AppTypography.headlineMdMobile.copyWith(fontSize: 18)),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Text('Expires 09/27', style: AppTypography.caption),
-                      const Spacer(),
-                      Text('•••• 8842', style: AppTypography.labelMd.copyWith(letterSpacing: 2)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-            GlassCard(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
                   Text('Spending Analysis', style: AppTypography.labelMd.copyWith(letterSpacing: 1)),
                   const SizedBox(height: 12),
                   Row(

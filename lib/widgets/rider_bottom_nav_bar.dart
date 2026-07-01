@@ -6,6 +6,7 @@ import '../core/router/app_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_typography.dart';
 import '../core/utils/app_dialogs.dart';
+import '../core/utils/navigation_utils.dart';
 
 enum RiderNavTab { home, tracking, wallet, profile }
 
@@ -37,9 +38,9 @@ class RiderBottomNavBar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _NavItem(
                 icon: Icons.home_rounded,
@@ -110,7 +111,7 @@ class RiiderHeader extends StatelessWidget {
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             icon: const Icon(Icons.menu, size: 22, color: AppColors.primary),
-            onPressed: onMenu,
+            onPressed: onMenu ?? () => popOrGoHome(context),
           ),
         if (onMenu != null) const SizedBox(width: 8),
         if (showBrand)
@@ -119,7 +120,7 @@ class RiiderHeader extends StatelessWidget {
             style: AppTypography.labelMd.copyWith(color: AppColors.primary, letterSpacing: 2),
           ),
         const Spacer(),
-        if (trailing != null) trailing!,
+        trailing ?? const SizedBox.shrink(),
         IconButton(
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
@@ -151,25 +152,44 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : AppColors.onSurfaceVariant;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: selected
-            ? BoxDecoration(
-                color: AppColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(16),
-              )
-            : null,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(height: 2),
-            Text(label, style: AppTypography.caption.copyWith(color: color)),
-          ],
+    final color = selected ? Colors.white : AppColors.onSurfaceVariant;
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: selected ? AppColors.primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.14),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: color, size: 22),
+                const SizedBox(height: 3),
+                Text(
+                  label,
+                  style: AppTypography.caption.copyWith(
+                    color: color,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

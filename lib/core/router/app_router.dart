@@ -105,7 +105,16 @@ GoRouter createRouter() {
       GoRoute(path: AppRoutes.reports, builder: (_, _) => const ReportsScreen()),
       GoRoute(path: AppRoutes.savedPlaces, builder: (_, _) => const SavedPlacesScreen()),
       GoRoute(path: AppRoutes.admin, builder: (_, _) => const AdminDashboardScreen()),
-      GoRoute(path: AppRoutes.destinationSearch, builder: (_, _) => const DestinationSearchScreen()),
+      GoRoute(
+        path: AppRoutes.destinationSearch,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? const {};
+          return DestinationSearchScreen(
+            returnSelection: extra['returnSelection'] as bool? ?? false,
+            origin: extra['origin'] as String? ?? 'Kituo cha Ubungo',
+          );
+        },
+      ),
       GoRoute(
         path: AppRoutes.routeRecommendation,
         builder: (context, state) {
